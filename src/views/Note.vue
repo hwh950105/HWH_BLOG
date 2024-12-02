@@ -1,0 +1,244 @@
+<template>
+  <div>
+    <NotionRenderer :blockMap="blockMaps" />
+  </div>
+
+  
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { getPageBlocks,NotionRenderer } from 'vue-notion';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const blockMaps = ref(null);
+
+onMounted(async () => {
+  const pageId = route.params.id;
+  console.log(pageId);
+
+  getPageBlocks(pageId).then(
+  (value) => (blockMaps.value = value));
+
+});
+</script>
+
+<style>
+/* 다크 모드 스타일 수정 */
+
+.notion {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgb(220, 220, 220);
+  caret-color: rgb(220, 220, 220);
+  background-color: rgb(32, 33, 36);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+    "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.notion > *,
+.notion-page > *,
+.notion-column > * {
+  padding: 3px 0px;
+}
+
+.notion * {
+  box-sizing: border-box;
+  margin-block-start: 0px;
+  margin-block-end: 0px;
+}
+
+/* 색상 수정 */
+.notion-red {
+  color: rgb(255, 99, 99);
+}
+.notion-pink {
+  color: rgb(255, 85, 175);
+}
+.notion-blue {
+  color: rgb(66, 165, 245);
+}
+.notion-purple {
+  color: rgb(179, 136, 255);
+}
+.notion-teal {
+  color: rgb(38, 166, 154);
+}
+.notion-yellow {
+  color: rgb(255, 214, 10);
+}
+.notion-orange {
+  color: rgb(255, 152, 0);
+}
+.notion-brown {
+  color: rgb(161, 136, 127);
+}
+.notion-gray {
+  color: rgb(189, 189, 189);
+}
+
+/* 배경색 수정 */
+.notion-red_background {
+  background-color: rgb(60, 30, 30);
+}
+.notion-pink_background {
+  background-color: rgb(55, 20, 50);
+}
+.notion-blue_background {
+  background-color: rgb(28, 40, 55);
+}
+.notion-purple_background {
+  background-color: rgb(50, 30, 60);
+}
+.notion-teal_background {
+  background-color: rgb(20, 50, 50);
+}
+.notion-yellow_background {
+  background-color: rgb(60, 55, 20);
+}
+.notion-orange_background {
+  background-color: rgb(55, 40, 20);
+}
+.notion-brown_background {
+  background-color: rgb(45, 35, 30);
+}
+.notion-gray_background {
+  background-color: rgb(50, 50, 50);
+}
+
+/* 불투명 배경색 수정 */
+.notion-red_background_co {
+  background-color: rgba(60, 30, 30, 0.3);
+}
+.notion-pink_background_co {
+  background-color: rgba(55, 20, 50, 0.3);
+}
+.notion-blue_background_co {
+  background-color: rgba(28, 40, 55, 0.3);
+}
+.notion-purple_background_co {
+  background-color: rgba(50, 30, 60, 0.3);
+}
+.notion-teal_background_co {
+  background-color: rgba(20, 50, 50, 0.3);
+}
+.notion-yellow_background_co {
+  background-color: rgba(60, 55, 20, 0.3);
+}
+.notion-orange_background_co {
+  background-color: rgba(55, 40, 20, 0.3);
+}
+.notion-brown_background_co {
+  background-color: rgba(45, 35, 30, 0.3);
+}
+.notion-gray_background_co {
+  background-color: rgba(50, 50, 50, 0.3);
+}
+
+.notion b {
+  font-weight: 600;
+}
+
+.notion-title {
+  font-size: 2.5em;
+  font-weight: 700;
+  margin-top: 0.75em;
+  margin-bottom: 0.25em;
+  color: rgb(255, 255, 255);
+}
+
+.notion-h1,
+.notion-h2,
+.notion-h3 {
+  font-weight: 600;
+  line-height: 1.3;
+  padding: 3px 2px;
+  color: rgb(220, 220, 220);
+}
+
+.notion-h1 {
+  font-size: 1.875em;
+  margin-top: 1.4em;
+}
+.notion-h1:first-child {
+  margin-top: 0;
+}
+.notion-h2 {
+  font-size: 1.5em;
+  margin-top: 1.1em;
+}
+.notion-h3 {
+  font-size: 1.25em;
+  margin-top: 1em;
+}
+
+.notion-page {
+  padding: 0;
+  margin: 0 auto;
+  max-width: 708px;
+  width: 100%;
+  background-color: rgb(32, 33, 36);
+}
+
+/* 코드 블록 다크 모드 배경 설정 */
+.notion-code {
+  padding: 30px 16px 30px 20px;
+  margin: 4px 0;
+  border-radius: 3px;
+  tab-size: 2;
+  display: block;
+  box-sizing: border-box;
+  overflow-x: auto;
+  background: rgb(40, 44, 52);
+  color: rgb(220, 220, 220);
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier,
+    monospace;
+}
+
+/* 기타 요소 스타일 조정 */
+.notion-page-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.notion-list {
+  margin-block-start: 0.6em;
+  margin-block-end: 0.6em;
+  color: rgb(220, 220, 220);
+}
+
+.notion-list-disc,
+.notion-list-numbered {
+  padding-left: 1.6em;
+  color: rgb(220, 220, 220);
+}
+
+.notion-inline-code {
+  color: rgb(255, 167, 167);
+  padding: 0.2em 0.4em;
+  background: rgba(135, 131, 120, 0.2);
+  border-radius: 3px;
+  font-size: 85%;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,
+    monospace;
+}
+
+.notion-hr {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.notion-link {
+  color: rgb(66, 165, 245);
+  text-decoration: underline;
+}
+
+.notion-gallery-card {
+  background: rgb(40, 40, 40);
+}
+
+.notion-bookmark {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+</style>
