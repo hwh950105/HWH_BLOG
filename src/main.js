@@ -3,7 +3,7 @@ import App from './App.vue';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
 import '../src/cssmain.css';
-import 'element-plus/theme-chalk/dark/css-vars.css'; // 다크 테마 적용
+import 'element-plus/theme-chalk/dark/css-vars.css'; 
 
 import router from './router'; // default로 내보낸 router를 가져옴
 

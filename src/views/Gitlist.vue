@@ -1,6 +1,6 @@
 <template>
   <div class="Gitlist">
-    <img class="imgbono" src="d:/hwhgit/NEW_hwh/hwh/src/assets/보노보노.png" alt="asd">
+    <img class="imgbono" src="../assets/보노보노.png" alt="asd">
     <h1>준비중</h1>
   </div>
 </template>
