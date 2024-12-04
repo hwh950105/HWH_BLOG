@@ -58,9 +58,7 @@
         <el-button @click="isDialogOpen = false">닫기</el-button>
       </div>
     </el-dialog>
-      <div class="my-loader" v-show="loading">
-      <Loading />
-    </div>
+
   </el-container>
 
 </template>

@@ -7,8 +7,15 @@ import 'element-plus/theme-chalk/dark/css-vars.css';
 
 import router from './router'; // default로 내보낸 router를 가져옴
 
-const app = createApp(App);
+import { createPinia } from 'pinia';
 
+
+
+const app = createApp(App);
+const pinia = createPinia();
+
+// pinia 등록
+app.use(pinia);
 // Element Plus 등록
 app.use(ElementPlus);
 app.use(router);

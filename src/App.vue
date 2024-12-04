@@ -6,9 +6,9 @@
         <div class="aside-content">
           <h1 class="blog-title">^,^</h1>
           <nav class="nav-menu">
-            <router-link to="/" class="nav-link">🔥 Home</router-link>
-            <router-link to="/Coin" class="nav-link">🪙 Coin</router-link>
-            <router-link to="/Notionlist" class="nav-link">🗊 Note</router-link>
+            <router-link to="/"  class="nav-link"  >🔥 Home</router-link>
+            <router-link to="/Coin" class="nav-link" >🪙 Coin</router-link>
+            <router-link to="/Notionlist" class="nav-link" >🗊 Note</router-link>
             <router-link to="/Gitlist" class="nav-link">💿 Git</router-link>
           </nav>
         </div>
@@ -19,7 +19,7 @@
         <!-- 헤더 -->
         <el-header class="header">
           <div class="header-content">
-            <h2> 음... </h2>
+            <h2>  {{ headertitle.value }} </h2>
           </div>
         </el-header>
 
@@ -38,7 +38,7 @@
     </el-container>
 
     <!-- 로딩 컴포넌트 -->
-    <div class="my-loader" v-show="loading">
+    <div class="my-loader" v-show="LoadingStore.isLoading">
       <Loading />
     </div>
     
@@ -48,12 +48,17 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import Loading from './components/loading.vue'; // 로딩 컴포넌트 가져오기
+import { useLoadingStore } from '@/stores/loading';
 
-const loading = ref(true); // 로딩 상태 관리
+const headertitle = ref('음.sss..ss');
+const LoadingStore = useLoadingStore();
 
+
+LoadingStore.ON();
 onMounted(() => {
+
   setTimeout(() => {
-    loading.value = false; // 4초 후 로딩 상태 해제
+    LoadingStore.OFF(); // 4초 후 로딩 상태 해제
   }, 1500);
 });
 </script>

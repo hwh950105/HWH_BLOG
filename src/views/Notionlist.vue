@@ -27,47 +27,53 @@
     <div class="post-content-area" v-if="blockMaps">
       <NotionRenderer :blockMap="blockMaps" />
     </div>
-
-    <!-- 로딩 컴포넌트 -->
-    <div class="my-loader" v-show="loading">
-      <Loading />
-    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
 import { getPageTable, getPageBlocks, NotionRenderer } from "vue-notion";
+import { useLoadingStore } from "@/stores/loading"; // Pinia 스토어 가져오기
 
 const list = ref([]);
 const blockMaps = ref(null); // Notion 데이터 상태
-const loading = ref(true);
+const loadingStore = useLoadingStore(); // Pinia 스토어 초기화
 
 // 데이터 로드 함수
 const fetchData = async () => {
+  loadingStore.ON(); // 로딩 시작
   try {
     const value = await getPageTable("48373eeff05846bbb5ff00f4af92e8a8");
     list.value = value; // 데이터 설정
+
+    if (list.value && list.value[0] && list.value[0].id && blockMaps.value == null) {
+      await navigate(value[0]); // navigate 호출
+    }
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
   } finally {
-    loading.value = false; // 데이터 로드 완료 후 로딩 종료
+    loadingStore.OFF(); // 로딩 종료
   }
 };
 
 // 포스트 클릭 시 데이터 로드
 const navigate = async (post) => {
+  loadingStore.ON(); // 로딩 시작
   try {
     const blocks = await getPageBlocks(post.id); // 데이터 로드
     blockMaps.value = blocks; // Notion 데이터 업데이트
   } catch (error) {
     console.error("블록 데이터를 가져오는 중 오류 발생:", error);
+  } finally {
+    loadingStore.OFF(); // 로딩 종료
   }
 };
 
 onMounted(() => {
   fetchData(); // 컴포넌트가 마운트될 때 데이터 로드
 });
+
+
 </script>
 
 <style scoped>
