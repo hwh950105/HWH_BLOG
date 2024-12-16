@@ -25,7 +25,9 @@ const components = import.meta.glob('./components/*.vue', { eager: true });
 
 Object.entries(components).forEach(([path, module]) => {
   const componentName = path.split('/').pop().replace('.vue', ''); // 파일 이름 추출
+  console.log('Registering component:', componentName); // 디버깅용 로그 추가
   app.component(componentName, module.default);
 });
+
 
 app.mount('#app');

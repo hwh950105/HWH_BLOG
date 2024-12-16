@@ -6,9 +6,9 @@
         <div class="aside-content">
           <h1 class="blog-title">^,^</h1>
           <nav class="nav-menu">
-            <router-link to="/"  class="nav-link"  >🔥 Home</router-link>
-            <router-link to="/Coin" class="nav-link" >🪙 Coin</router-link>
-            <router-link to="/Notionlist" class="nav-link" >🗊 Note</router-link>
+            <router-link to="/" class="nav-link">🔥 Home</router-link>
+            <router-link to="/Coin" class="nav-link">🪙 Coin</router-link>
+            <router-link to="/Notionlist" class="nav-link">🗊 Note</router-link>
             <router-link to="/Gitlist" class="nav-link">💿 Git</router-link>
           </nav>
         </div>
@@ -19,7 +19,7 @@
         <!-- 헤더 -->
         <el-header class="header">
           <div class="header-content">
-            <h2>  {{ headertitle.value }} </h2>
+            <h2>{{ headertitle.value }}</h2>
           </div>
         </el-header>
 
@@ -41,22 +41,33 @@
     <div class="my-loader" v-show="LoadingStore.isLoading">
       <Loading />
     </div>
-    
+
+    <!-- HWHChat 컴포넌트 -->
+    <HWHChat v-if="isChatVisible" class="chat-modal" />
+
+    <!-- 채팅 토글 버튼 -->
+    <button class="chat-toggle-button" @click="toggleChat">
+      💬
+    </button>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
 import Loading from './components/loading.vue'; // 로딩 컴포넌트 가져오기
+import HWHChat from './components/HWHChat.vue'; // HWHChat 컴포넌트 가져오기
 import { useLoadingStore } from '@/stores/loading';
 
 const headertitle = ref('음.sss..ss');
 const LoadingStore = useLoadingStore();
+const isChatVisible = ref(false); // 채팅 창 표시 여부
 
+const toggleChat = () => {
+  isChatVisible.value = !isChatVisible.value; // 버튼 클릭 시 토글
+};
 
 LoadingStore.ON();
 onMounted(() => {
-
   setTimeout(() => {
     LoadingStore.OFF(); // 4초 후 로딩 상태 해제
   }, 1500);
@@ -141,7 +152,6 @@ onMounted(() => {
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 카드 그림자 */
-
   gap: 20px;
 }
 
@@ -184,4 +194,55 @@ onMounted(() => {
   font-size: 0.9rem;
   border-top: 1px solid #2c2c2c;
 }
+
+/* 채팅 모달 스타일 */
+.chat-modal {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 480px;
+  max-height: 80vh;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  background-color: #2c2c2c; /* 채팅 배경색 */
+  z-index: 1000; /* 최상위에 표시 */
+}
+
+/* 채팅 창이 사라질 때 애니메이션 */
+.chat-modal.hidden {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+/* 채팅 토글 버튼 스타일 */
+.chat-toggle-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background-color: #ffcc00;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  /* transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; */
+  z-index: 1100; /* 버튼이 항상 위에 */
+}
+
+.chat-toggle-button:hover {
+  background-color: #ffcc0033;
+  transform: scale(1.1);
+}
+
+.chat-toggle-button:active {
+  transform: scale(0.95);
+}
+
 </style>
