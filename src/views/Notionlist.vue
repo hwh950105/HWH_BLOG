@@ -1,4 +1,21 @@
 <template>
+<div>
+  <div class="blog-title">
+    <el-col v-for ="item in items"
+    :key="item.index"
+    class="blog-title"
+    >
+    <el-card class="title-card">
+      <div>
+          {{item.title}}
+      </div>
+
+    </el-card>
+
+    </el-col>
+
+  </div>
+</div>
   <div class="blog-container">
     <!-- 블로그 리스트 -->
     <div class="blog-page-list">
@@ -36,6 +53,7 @@ import { getPageTable, getPageBlocks, NotionRenderer } from "vue-notion";
 import { useLoadingStore } from "@/stores/loading"; // Pinia 스토어 가져오기
 
 const list = ref([]);
+const items = ref([]);
 const blockMaps = ref(null); // Notion 데이터 상태
 const loadingStore = useLoadingStore(); // Pinia 스토어 초기화
 
@@ -71,6 +89,12 @@ const navigate = async (post) => {
 
 onMounted(() => {
   fetchData(); // 컴포넌트가 마운트될 때 데이터 로드
+
+    items.value = [
+    { index: 1, title: "첫 번째 아이템" },
+    { index: 2, title: "두 번째 아이템" },
+    { index: 3, title: "세 번째 아이템" },
+  ];
 });
 
 
