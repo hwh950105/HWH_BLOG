@@ -1,48 +1,50 @@
 <template>
-<div>
-  <div class="blog-title">
-    <el-col v-for ="item in items"
-    :key="item.index"
-    class="blog-title"
-    >
-    <el-card class="title-card">
-      <div>
-          {{item.title}}
-      </div>
-
-    </el-card>
-
-    </el-col>
-
-  </div>
-</div>
-  <div class="blog-container">
-    <!-- 블로그 리스트 -->
-    <div class="blog-page-list">
-      <el-row :gutter="20">
-        <div
-          v-for="post in list"
-          :key="post.id"
-          class="blog-item-col"
-          @click="navigate(post)"
-        >
-          <el-col :span="24">
-            <el-card class="blog-item" shadow="hover">
-              <div class="blog-item-inner">
-                <div class="blog-item-content">
-                  <div class="blog-title">{{ post.title }}</div>
-                  <div class="blog-contents">{{ post.contents }}</div>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-        </div>
-      </el-row>
+  <div>
+    <!-- Blog Title Section -->
+    <div class="blog-title">
+      <el-col
+        v-for="item in items"
+        :key="item.index"
+        class="title-card"
+        @click="fetchBlockData(item.PageTablekey)"
+      >
+        <el-card>
+          <div>
+            {{ item.title }}
+          </div>
+        </el-card>
+      </el-col>
     </div>
 
-    <!-- NotionRenderer로 데이터 렌더링 -->
-    <div class="post-content-area" v-if="blockMaps">
-      <NotionRenderer :blockMap="blockMaps" />
+    <!-- Blog Container Section -->
+    <div class="blog-container">
+      <!-- Blog Page List -->
+      <div class="blog-page-list">
+        <el-row :gutter="20">
+          <div
+            v-for="post in list"
+            :key="post.id"
+            class="blog-item-col"
+            @click="navigate(post)"
+          >
+            <el-col :span="24">
+              <el-card class="blog-item" shadow="hover">
+                <div class="blog-item-inner">
+                  <div class="blog-item-content">
+                    <div class="blog-title">{{ post.title }}</div>
+                    <div class="blog-contents">{{ post.contents }}</div>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+          </div>
+        </el-row>
+      </div>
+
+      <!-- Notion Renderer -->
+      <div class="post-content-area" v-if="blockMaps">
+        <NotionRenderer :blockMap="blockMaps" />
+      </div>
     </div>
   </div>
 </template>
@@ -50,23 +52,28 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { getPageTable, getPageBlocks, NotionRenderer } from "vue-notion";
-import { useLoadingStore } from "@/stores/loading"; // Pinia 스토어 가져오기
+import { useLoadingStore } from "@/stores/loading";
 
 const list = ref([]);
 const items = ref([]);
-const blockMaps = ref(null); // Notion 데이터 상태
-const loadingStore = useLoadingStore(); // Pinia 스토어 초기화
+const blockMaps = ref(null);
+const loadingStore = useLoadingStore();
 
-// 데이터 로드 함수
-const fetchData = async () => {
+onMounted(() => {
+  fetchData();
+  items.value = [
+    { index: 1, title: "첫 번째 아이템", PageTablekey: "item1" },
+    { index: 2, title: "두 번째 아이템", PageTablekey: "item2" },
+    { index: 3, title: "세 번째 아이템", PageTablekey: "item3" },
+  ];
+});
+
+// 클릭 시 PageBlocks 데이터를 로드하는 함수
+const fetchBlockData = async (PageTablekey) => {
   loadingStore.ON(); // 로딩 시작
   try {
-    const value = await getPageTable("48373eeff05846bbb5ff00f4af92e8a8");
-    list.value = value; // 데이터 설정
-
-    if (list.value && list.value[0] && list.value[0].id && blockMaps.value == null) {
-      await navigate(value[0]); // navigate 호출
-    }
+    const blocks = await getPageBlocks(PageTablekey); // PageTablekey 기반 데이터 가져오기
+    blockMaps.value = blocks; // 가져온 데이터 설정
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
   } finally {
@@ -74,30 +81,33 @@ const fetchData = async () => {
   }
 };
 
-// 포스트 클릭 시 데이터 로드
-const navigate = async (post) => {
-  loadingStore.ON(); // 로딩 시작
+// 기본 데이터 로드
+const fetchData = async () => {
+  loadingStore.ON();
   try {
-    const blocks = await getPageBlocks(post.id); // 데이터 로드
-    blockMaps.value = blocks; // Notion 데이터 업데이트
+    const value = await getPageTable("48373eeff05846bbb5ff00f4af92e8a8");
+    list.value = value;
+    if (list.value?.[0]?.id && blockMaps.value == null) {
+      await navigate(value[0]);
+    }
   } catch (error) {
-    console.error("블록 데이터를 가져오는 중 오류 발생:", error);
+    console.error("데이터를 가져오는 중 오류 발생:", error);
   } finally {
-    loadingStore.OFF(); // 로딩 종료
+    loadingStore.OFF();
   }
 };
 
-onMounted(() => {
-  fetchData(); // 컴포넌트가 마운트될 때 데이터 로드
-
-    items.value = [
-    { index: 1, title: "첫 번째 아이템" },
-    { index: 2, title: "두 번째 아이템" },
-    { index: 3, title: "세 번째 아이템" },
-  ];
-});
-
-
+const navigate = async (post) => {
+  loadingStore.ON();
+  try {
+    const blocks = await getPageBlocks(post.id);
+    blockMaps.value = blocks;
+  } catch (error) {
+    console.error("데이터를 가져오는 중 오류 발생:", error);
+  } finally {
+    loadingStore.OFF();
+  }
+};
 </script>
 
 <style scoped>
@@ -194,5 +204,39 @@ onMounted(() => {
 .my-loader {
   margin-top: 20px;
   text-align: center;
+}
+
+.blog-title {
+  display: flex; /* Flexbox 활성화 */
+  flex-direction: row; /* 가로 정렬 */
+  gap: 16px; /* 카드 간 간격 */
+  padding: 12px 16px; /* 전체 섹션의 내부 여백 */
+  background: linear-gradient(135deg, #1e1e1e, #2b2b2b); /* 배경 그라디언트 */
+  border-radius: 12px; /* 둥근 모서리 */
+  overflow-x: auto; /* 가로 스크롤 허용 */
+  align-items: center; /* 세로 중앙 정렬 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 약간의 그림자 추가 */
+}
+
+.title-card {
+  min-width: 180px; /* 최소 너비 설정 */
+  max-width: 220px; /* 최대 너비 설정 */
+  height: 120px; /* 카드 고정 높이 */
+  background: linear-gradient(135deg, #282828, #3a3a3a); /* 카드 배경 그라디언트 */
+  border-radius: 8px; /* 둥근 모서리 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* 부드러운 그림자 */
+  display: flex; /* Flexbox로 콘텐츠 정렬 */
+  justify-content: center; /* 콘텐츠 가로 중앙 정렬 */
+  align-items: center; /* 콘텐츠 세로 중앙 정렬 */
+  font-size: 1em; /* 텍스트 크기 */
+  color: #ffffff; /* 텍스트 색상 */
+  cursor: pointer; /* 마우스 포인터 */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* 부드러운 Hover 효과 */
+}
+
+.title-card:hover {
+  transform: translateY(-4px); /* Hover 시 위로 살짝 이동 */
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3); /* Hover 시 그림자 강화 */
+  border: 1px solid #ffcc00; /* 강조 색상 */
 }
 </style>
