@@ -2,7 +2,7 @@
   <div class="stock-container">
     <!-- 헤더 -->
     <header class="stock-header">
-      <h2>주요 지수</h2>
+      <h2>📊 주요 지수</h2>
     </header>
 
     <!-- 주요 지수 카드 -->
@@ -42,9 +42,8 @@ const error = ref("");
 // API 호출 함수
 const fetchStockIndices = async () => {
   try {
-    const nasdaqResponse = await axios.get("http://zaq8077.iptime.org/api/nasdaq");
-    const dowResponse = await axios.get("http://zaq8077.iptime.org/api/dow");
-
+    const nasdaqResponse = await axios.get("http://localhost:3000/api/nasdaq");
+    const dowResponse = await axios.get("http://localhost:3000/api/dow");
 
     const nasdaqData = nasdaqResponse.data.chart.result[0].meta;
     const dowData = dowResponse.data.chart.result[0].meta;

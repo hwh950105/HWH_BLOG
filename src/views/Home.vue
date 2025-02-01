@@ -5,7 +5,6 @@
     </div>
     <div class="block global-indices">
       <GlobalIndices></GlobalIndices>
-  
     </div>
   </div>
 </template>
