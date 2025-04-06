@@ -83,6 +83,9 @@ onMounted(() => {
   background-color: #2d3748;
   color: #f7fafc;
   border-radius: 12px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .stock-header {
@@ -92,9 +95,11 @@ onMounted(() => {
 }
 
 .loading {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #90cdf4;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 10px;
 }
 
 .error-message {
@@ -117,6 +122,10 @@ onMounted(() => {
   border-radius: 8px;
   padding: 15px;
   font-size: 1.1rem;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .index-title {

@@ -23,6 +23,7 @@ import GlobalIndices from '@/components/GlobalIndices.vue';
   align-items: flex-start; /* 수직 정렬 */
   width: 100%;
   overflow: hidden;
+  min-height: 280px;
 }
 
 .global-indices * {
@@ -48,11 +49,19 @@ import GlobalIndices from '@/components/GlobalIndices.vue';
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   width: 100%;
   overflow: hidden;
+  min-height: 100px;
 }
 
 /* GlobalIndices 컴포넌트의 내부 요소 강제 스타일 적용 */
 :deep(.stock-card) {
   text-align: left; /* 내부 카드 왼쪽 정렬 */
+  min-height: 80px;
+  margin-bottom: 10px;
+}
+
+:deep(.el-skeleton) {
+  width: 100%;
+  height: 80px;
 }
 
 :deep(.index-title),
