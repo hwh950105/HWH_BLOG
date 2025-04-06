@@ -4,29 +4,34 @@
       <!-- 사이드바 -->
       <el-aside class="aside">
         <div class="aside-content">
-          <h1 class="blog-title">^,^</h1>
-          <nav class="nav-menu">
-            <router-link to="/" class="nav-link">🔥 Home</router-link>
-            <router-link to="/Coin" class="nav-link">🪙 Coin</router-link>
-            <router-link to="/Notionlist" class="nav-link">🗊 Note</router-link>
-            <router-link to="/Gitlist" class="nav-link">💿 Git</router-link>
-          </nav>
+          <div class="nav-section">
+            <h1 class="blog-title">^,^</h1>
+            <nav class="nav-menu">
+              <router-link to="/" class="nav-link">🔥 Home</router-link>
+              <router-link to="/Coin" class="nav-link">🪙 Coin</router-link>
+              <router-link to="/Notionlist" class="nav-link">🗊 Note</router-link>
+              <router-link to="/Gitlist" class="nav-link">💿 Git</router-link>
+            </nav>
+          </div>
+          <div class="music-player-section">
+            <YTMusicPlayer />
+          </div>
         </div>
       </el-aside>
 
       <!-- 메인 콘텐츠 -->
-      <el-container>
+      <el-container class="main-container">
         <!-- 헤더 -->
         <el-header class="header">
           <div class="header-content">
-            <h2>{{ headertitle.value }}</h2>
+            <h2>{{ headertitle }}</h2>
           </div>
         </el-header>
 
         <!-- 메인 -->
         <el-main class="main">
           <div class="post-container">
-            <router-view></router-view> <!-- 라우터 뷰 -->
+            <router-view></router-view>
           </div>
         </el-main>
 
@@ -56,6 +61,7 @@
 import { onMounted, ref } from "vue";
 import Loading from './components/loading.vue'; // 로딩 컴포넌트 가져오기
 import HWHChat from './components/HWHChat.vue'; // HWHChat 컴포넌트 가져오기
+import YTMusicPlayer from './components/YTMusicPlayer.vue';
 import { useLoadingStore } from '@/stores/loading';
 
 const headertitle = ref('음.sss..ss');
@@ -77,21 +83,57 @@ onMounted(() => {
 <style scoped>
 /* 전체 레이아웃 */
 .common-layout {
-  background-color: #141414; /* 진한 다크 배경 */
+  background-color: #141414;
   color: #ffffff;
-  font-family: 'Inter', Arial, sans-serif; /* 현대적인 폰트 */
-  height: 100vh;
+  font-family: 'Inter', Arial, sans-serif;
+  min-height: 100vh;
   display: flex;
+  overflow: hidden;
 }
 
 /* 사이드바 */
 .aside {
-  background-color: #1f1f1f; /* 사이드바 배경 */
+  background-color: #1f1f1f;
   color: #ffffff;
-  width: 250px;
-  padding: 20px;
-  border-right: 1px solid #2c2c2c; /* 경계선 */
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2); /* 입체감 */
+  width: 220px;
+  padding: 20px 10px;
+  border-right: 1px solid #2c2c2c;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.aside-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 40px);
+  justify-content: space-between;
+}
+
+/* 메인 컨테이너 */
+.main-container {
+  margin-left: 220px;
+  width: calc(100% - 220px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.nav-section {
+  flex-grow: 1;
+  margin-bottom: 20px;
+}
+
+.music-player-section {
+  margin-top: auto;
+  padding-top: 20px;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .blog-title {
@@ -128,31 +170,34 @@ onMounted(() => {
   color: #ffffff;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 헤더 그림자 */
+  border-bottom: 1px solid #2c2c2c;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-content h2 {
   font-size: 1.5rem;
-  letter-spacing: 3px;
   font-weight: 500;
   color: #ffcc00; /* 헤더 타이틀 강조 */
 }
 
 /* 메인 콘텐츠 */
 .main {
-  padding: 3px;
-  background-color: #181818; /* 메인 배경 */
-  flex-grow: 1;
-  border-radius: 8px;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* 내부 그림자 */
-  color: #e0e0e0;
+  flex: 1;
+  padding: 20px;
+  background-color: #181818;
+  min-height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .post-container {
-  background-color: #242424; /* 게시글 카드 배경 */
+  background-color: #242424;
   padding: 20px;
   border-radius: 5px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 카드 그림자 */
-  gap: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  min-height: calc(100vh - 160px);
 }
 
 .post-title {
@@ -193,6 +238,9 @@ onMounted(() => {
   padding: 15px;
   font-size: 0.9rem;
   border-top: 1px solid #2c2c2c;
+  height: 50px;
+  position: relative;
+  z-index: 1;
 }
 
 /* 채팅 모달 스타일 */
@@ -243,6 +291,25 @@ onMounted(() => {
 
 .chat-toggle-button:active {
   transform: scale(0.95);
+}
+
+/* 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f1f1f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
 }
 
 </style>

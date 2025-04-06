@@ -6,25 +6,22 @@
     </header>
 
     <!-- 주요 지수 카드 -->
-    <div v-if="loading" class="loading">데이터를 불러오는 중...</div>
-    <div v-else class="stock-cards">
-      <el-card
-        v-for="(value, key) in indices"
-        :key="key"
-        class="stock-card"
-        shadow="hover"
-      >
-        <div class="index-title">{{ key }}</div>
-        <div class="index-value" :class="{ 'up': value.change > 0, 'down': value.change < 0 }">
-          {{ value.price }} ({{ value.change.toFixed(2) }}%)
-        </div>
-      </el-card>
+    <div v-if="loading" class="loading">
+      <el-skeleton animated />
     </div>
 
+    <el-card v-for="(value, key) in indices" :key="key" class="stock-card" shadow="hover">
+      <div class="index-title">{{ key }}</div>
+        <div class="index-value" :class="{ 'up': value.change > 0, 'down': value.change < 0 }">
+        {{ formatNumber(value.price) }} ({{ value.change.toFixed(2) }}%)
+        </div>
+    </el-card>
     <!-- 에러 메시지 -->
     <div v-if="error" class="error-message">
       {{ error }}
     </div>
+
+
   </div>
 </template>
 
@@ -42,20 +39,19 @@ const error = ref("");
 // API 호출 함수
 const fetchStockIndices = async () => {
   try {
-    const nasdaqResponse = await axios.get("http://zaq8077.iptime.org/api/nasdaq");
-    const dowResponse = await axios.get("http://zaq8077.iptime.org/api/dow");
-
-
-    const nasdaqData = nasdaqResponse.data.chart.result[0].meta;
-    const dowData = dowResponse.data.chart.result[0].meta;
+    const [nasdaqResponse, dowResponse] = await Promise.all([
+      axios.get("/api/nasdaq2"),
+      axios.get("/api/dow2"),
+    ]);
 
     indices.value.NASDAQ = {
-      price: nasdaqData.regularMarketPrice.toFixed(2),
-      change: ((nasdaqData.regularMarketPrice - nasdaqData.previousClose) / nasdaqData.previousClose) * 100,
+      price: nasdaqResponse.data.regularMarketPrice.toFixed(2),
+      change: ((nasdaqResponse.data.regularMarketPrice - nasdaqResponse.data.previousClose) / nasdaqResponse.data.previousClose) * 100,
     };
+    
     indices.value.DOW = {
-      price: dowData.regularMarketPrice.toFixed(2),
-      change: ((dowData.regularMarketPrice - dowData.previousClose) / dowData.previousClose) * 100,
+      price: dowResponse.data.regularMarketPrice.toFixed(2),
+      change: ((dowResponse.data.regularMarketPrice - dowResponse.data.previousClose) / dowResponse.data.previousClose) * 100,
     };
   } catch (err) {
     console.error("Error fetching data:", err.message);
@@ -63,6 +59,15 @@ const fetchStockIndices = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const formatNumber = (num) => {
+  if (num >= 1e9) return (num / 1e9).toFixed(2) + "B"; // 십억 단위
+  if (num >= 1e6) return (num / 1e6).toFixed(2) + "M"; // 백만 단위
+  if (num >= 1e3) return (num / 1e3).toFixed(2) + "K"; // 천 단위
+
+  
+  return 0;
 };
 
 onMounted(() => {
