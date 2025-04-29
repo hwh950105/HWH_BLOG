@@ -62,18 +62,20 @@ const loadingStore = useLoadingStore();
 onMounted(() => {
   fetchData();
   items.value = [
-    { index: 1, title: "첫 번째 아이템", PageTablekey: "item1" },
-    { index: 2, title: "두 번째 아이템", PageTablekey: "item2" },
-    { index: 3, title: "세 번째 아이템", PageTablekey: "item3" },
+    { index: 1, title: "vue-notion", PageTablekey: "48373eeff05846bbb5ff00f4af92e8a8" },
+    { index: 2, title: "미정", PageTablekey: "1ce4e7142c43800d8305e5256b87d4b4" },
+    { index: 3, title: "미정2", PageTablekey: "1ce4e7142c4380f39073d4c59fecd6b5" },
   ];
 });
-
 // 클릭 시 PageBlocks 데이터를 로드하는 함수
 const fetchBlockData = async (PageTablekey) => {
   loadingStore.ON(); // 로딩 시작
   try {
-    const blocks = await getPageBlocks(PageTablekey); // PageTablekey 기반 데이터 가져오기
-    blockMaps.value = blocks; // 가져온 데이터 설정
+    const value = await getPageTable(PageTablekey); // PageTablekey 기반 데이터 가져오기
+        list.value = value;
+    if (list.value?.[0]?.id && blockMaps.value == null) {
+      await navigate(value[0]);
+    }
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
   } finally {
@@ -207,36 +209,76 @@ const navigate = async (post) => {
 }
 
 .blog-title {
-  display: flex; /* Flexbox 활성화 */
-  flex-direction: row; /* 가로 정렬 */
-  gap: 16px; /* 카드 간 간격 */
-  padding: 12px 16px; /* 전체 섹션의 내부 여백 */
-  background: linear-gradient(135deg, #1e1e1e, #2b2b2b); /* 배경 그라디언트 */
-  border-radius: 12px; /* 둥근 모서리 */
-  overflow-x: auto; /* 가로 스크롤 허용 */
-  align-items: center; /* 세로 중앙 정렬 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 약간의 그림자 추가 */
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #1f1f1f, #2d2d2d);
+  border-radius: 12px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid #2c2c2c;
 }
 
 .title-card {
-  min-width: 180px; /* 최소 너비 설정 */
-  max-width: 220px; /* 최대 너비 설정 */
-  height: 120px; /* 카드 고정 높이 */
-  background: linear-gradient(135deg, #282828, #3a3a3a); /* 카드 배경 그라디언트 */
-  border-radius: 8px; /* 둥근 모서리 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* 부드러운 그림자 */
-  display: flex; /* Flexbox로 콘텐츠 정렬 */
-  justify-content: center; /* 콘텐츠 가로 중앙 정렬 */
-  align-items: center; /* 콘텐츠 세로 중앙 정렬 */
-  font-size: 1em; /* 텍스트 크기 */
-  color: #ffffff; /* 텍스트 색상 */
-  cursor: pointer; /* 마우스 포인터 */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* 부드러운 Hover 효과 */
+  min-width: 180px;
+  max-width: 220px;
+  height: 120px;
+  background: linear-gradient(135deg, #282828, #3a3a3a);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.1em;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #333;
 }
 
 .title-card:hover {
-  transform: translateY(-4px); /* Hover 시 위로 살짝 이동 */
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3); /* Hover 시 그림자 강화 */
-  border: 1px solid #ffcc00; /* 강조 색상 */
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+  border-color: #ffcc00;
+  background: linear-gradient(135deg, #2d2d2d, #3a3a3a);
+}
+
+.title-card .el-card {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.title-card .el-card div {
+  text-align: center;
+  color: #ffcc00;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* 스크롤바 스타일링 */
+.blog-title::-webkit-scrollbar {
+  height: 6px;
+}
+
+.blog-title::-webkit-scrollbar-track {
+  background: #1f1f1f;
+  border-radius: 3px;
+}
+
+.blog-title::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.blog-title::-webkit-scrollbar-thumb:hover {
+  background: #444;
 }
 </style>

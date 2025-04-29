@@ -6,6 +6,9 @@
     <div class="block global-indices">
       <GlobalIndices></GlobalIndices>
     </div>
+    <div class="block">
+      <WeatherWidget></WeatherWidget>
+    </div>
   </div>
 </template>
 
@@ -13,6 +16,7 @@
 <script setup>
 import hwhtime from '@/components/hwhtime.vue';
 import GlobalIndices from '@/components/GlobalIndices.vue';
+import WeatherWidget from '@/components/WeatherWidget.vue';
 </script>
 
 

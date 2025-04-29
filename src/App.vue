@@ -122,6 +122,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  position: relative;
+  height: 100vh;
 }
 
 .nav-section {
@@ -190,6 +192,8 @@ onMounted(() => {
   min-height: calc(100vh - 120px);
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
+  height: calc(100vh - 120px);
 }
 
 .post-container {
@@ -198,6 +202,9 @@ onMounted(() => {
   border-radius: 5px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   min-height: calc(100vh - 160px);
+  overflow-y: auto;
+  position: relative;
+  height: calc(100vh - 160px);
 }
 
 .post-title {
@@ -241,6 +248,7 @@ onMounted(() => {
   height: 50px;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 /* 채팅 모달 스타일 */

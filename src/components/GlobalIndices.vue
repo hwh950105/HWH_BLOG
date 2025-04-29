@@ -44,15 +44,19 @@ const fetchStockIndices = async () => {
       axios.get("/api/dow2"),
     ]);
 
-    indices.value.NASDAQ = {
-      price: nasdaqResponse.data.regularMarketPrice.toFixed(2),
-      change: ((nasdaqResponse.data.regularMarketPrice - nasdaqResponse.data.previousClose) / nasdaqResponse.data.previousClose) * 100,
-    };
+    if (nasdaqResponse.data && nasdaqResponse.data.regularMarketPrice) {
+      indices.value.NASDAQ = {
+        price: nasdaqResponse.data.regularMarketPrice.toFixed(2),
+        change: ((nasdaqResponse.data.regularMarketPrice - nasdaqResponse.data.previousClose) / nasdaqResponse.data.previousClose) * 100,
+      };
+    }
     
-    indices.value.DOW = {
-      price: dowResponse.data.regularMarketPrice.toFixed(2),
-      change: ((dowResponse.data.regularMarketPrice - dowResponse.data.previousClose) / dowResponse.data.previousClose) * 100,
-    };
+    if (dowResponse.data && dowResponse.data.regularMarketPrice) {
+      indices.value.DOW = {
+        price: dowResponse.data.regularMarketPrice.toFixed(2),
+        change: ((dowResponse.data.regularMarketPrice - dowResponse.data.previousClose) / dowResponse.data.previousClose) * 100,
+      };
+    }
   } catch (err) {
     console.error("Error fetching data:", err.message);
     error.value = "데이터를 불러오는데 실패했습니다. 잠시 후 다시 시도해 주세요.";

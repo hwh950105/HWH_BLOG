@@ -91,6 +91,12 @@
       width="50%" 
       :before-close="closePopup"
       class="playlist-dialog"
+      :modal="true"
+      :close-on-click-modal="false"
+      :close-on-press-escape="true"
+      :show-close="true"
+      :append-to-body="true"
+      :destroy-on-close="true"
     >
       <div id="popup-player"></div>
       <el-scrollbar class="playlist">
@@ -691,6 +697,43 @@ onBeforeUnmount(() => {
 .playlist-dialog {
   --el-dialog-bg-color: #1a1a1a;
   --el-dialog-border-radius: 15px;
+  --el-dialog-padding-primary: 20px;
+}
+
+.playlist-dialog :deep(.el-dialog) {
+  background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+  border: 1px solid #333;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.playlist-dialog :deep(.el-dialog__header) {
+  padding: 20px;
+  border-bottom: 1px solid #333;
+  margin-right: 0;
+}
+
+.playlist-dialog :deep(.el-dialog__title) {
+  color: #ffcc00;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.playlist-dialog :deep(.el-dialog__body) {
+  padding: 20px;
+}
+
+.playlist-dialog :deep(.el-dialog__headerbtn) {
+  top: 20px;
+  right: 20px;
+}
+
+.playlist-dialog :deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: #ffcc00;
+  font-size: 1.2em;
+}
+
+.playlist-dialog :deep(.el-dialog__headerbtn:hover .el-dialog__close) {
+  color: #ffd633;
 }
 
 .playlist {
