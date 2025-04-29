@@ -5,15 +5,21 @@
     </div>
     <div class="block global-indices">
       <GlobalIndices></GlobalIndices>
+<<<<<<< HEAD
+=======
+    </div>
+    <div class="block">
+      <WeatherWidget></WeatherWidget>
+>>>>>>> recoverde_real_work
     </div>
   </div>
 </template>
 
 
-<script>
-export default {
-  name: "HomeMain",
-};
+<script setup>
+import hwhtime from '@/components/hwhtime.vue';
+import GlobalIndices from '@/components/GlobalIndices.vue';
+import WeatherWidget from '@/components/WeatherWidget.vue';
 </script>
 
 
@@ -23,6 +29,8 @@ export default {
   justify-content: flex-start; /* 왼쪽 정렬 */
   align-items: flex-start; /* 수직 정렬 */
   width: 100%;
+  overflow: hidden;
+  min-height: 280px;
 }
 
 .global-indices * {
@@ -37,6 +45,8 @@ export default {
   gap: 20px;
   padding: 20px;
   align-items: flex-start;
+  overflow: hidden;
+  height: 100%;
 }
 
 .block {
@@ -45,15 +55,24 @@ export default {
   border-radius: 5px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   width: 100%;
+  overflow: hidden;
+  min-height: 100px;
 }
 
 /* GlobalIndices 컴포넌트의 내부 요소 강제 스타일 적용 */
-::v-deep(.stock-card) {
+:deep(.stock-card) {
   text-align: left; /* 내부 카드 왼쪽 정렬 */
+  min-height: 80px;
+  margin-bottom: 10px;
 }
 
-::v-deep(.index-title),
-::v-deep(.index-value) {
+:deep(.el-skeleton) {
+  width: 100%;
+  height: 80px;
+}
+
+:deep(.index-title),
+:deep(.index-value) {
   text-align: left; /* 제목과 값 왼쪽 정렬 */
 }
 
