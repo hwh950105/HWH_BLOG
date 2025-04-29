@@ -102,6 +102,8 @@ export default {
           this.progressPercent = Math.floor(progress);
         } else if (currentTimeInSeconds >= workEndTime) {
           // 18시 이후, 다음날 9시까지 남은 시간
+          this.beforeWork = false;
+          this.afterWork = true;
           const nextWorkStartTime = this.calculateNextWorkStart(now);
           const remainingTime = nextWorkStartTime - Math.floor(now.getTime() / 1000);
           this.timeUntilWork = this.formatTime(remainingTime);
@@ -109,6 +111,8 @@ export default {
           this.progressPercent = 0;
         } else if (currentTimeInSeconds < workStartTime) {
           // 9시 전
+          this.beforeWork = true;
+          this.afterWork = false;
           const remainingTime = workStartTime - currentTimeInSeconds;
           this.timeUntilWork = this.formatTime(remainingTime);
           this.progressWidth = "0%";
@@ -151,6 +155,7 @@ export default {
     },
   },
   mounted() {
+    // 초기 로딩 없이 바로 시간 업데이트
     this.updateTime();
     setInterval(() => this.updateTime(), 1000); // 1초마다 시간 업데이트
   },
