@@ -1,5 +1,5 @@
 <template>
-  <div class="common-layout">
+  <div class="common-layout" :class="{ 'light-mode': !isDarkMode }">
     <el-container>
       <!-- 사이드바 -->
       <el-aside class="aside" width="280px" :class="{ 'mobile-open': isMobileMenuOpen }">
@@ -13,9 +13,7 @@
               <router-link to="/Gitlist" class="nav-link">💿 Git</router-link>
             </nav>
           </div>
-          <div class="music-player-section">
-            <YTMusicPlayer />
-          </div>
+          <!-- 뮤직 플레이어는 이제 Home.vue에서 처리 -->
         </div>
       </el-aside>
 
@@ -31,6 +29,13 @@
           <div class="header-content">
             <h2>{{ headertitle }}</h2>
             <div class="header-actions">
+              <el-switch
+                v-model="isDarkMode"
+                class="theme-switch"
+                active-text="🌙"
+                inactive-text="☀️"
+                @change="toggleTheme"
+              />
               <span class="current-date">{{ currentDate }}</span>
             </div>
           </div>
@@ -45,7 +50,7 @@
 
         <!-- 푸터 -->
         <el-footer class="footer">
-          &copy; 2023 HWH BLOG - All Rights Reserved
+          &copy; 2025 HWH BLOG
         </el-footer>
       </el-container>
     </el-container>
@@ -59,9 +64,13 @@
     <HWHChat v-if="isChatVisible" class="chat-modal" />
 
     <!-- 채팅 토글 버튼 -->
-    <button class="chat-toggle-button" @click="toggleChat">
-      💬
-    </button>
+    <button class="chat-toggle-button" @click="toggleChat">💬</button>
+
+    <!-- 뮤직 토글 버튼 -->
+    <!-- <button class="music-toggle-button" @click="toggleMusic">🎵</button> -->
+
+    <!-- 뮤직 플레이어 -->
+    <!-- <YTMusicPlayer v-if="isMusicVisible" /> -->
 
     <!-- 사이드바 오버레이 -->
     <div class="sidebar-overlay" v-if="isMobileMenuOpen" @click="toggleMobileMenu"></div>
@@ -70,32 +79,53 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import Loading from './components/loading.vue'; // 로딩 컴포넌트 가져오기
-import HWHChat from './components/HWHChat.vue'; // HWHChat 컴포넌트 가져오기
+import Loading from './components/loading.vue';
+import HWHChat from './components/HWHChat.vue';
 import YTMusicPlayer from './components/YTMusicPlayer.vue';
 import { useLoadingStore } from '@/stores/loading';
+import { useThemeStore } from '@/stores/theme';
 
 const headertitle = ref('HWH BLOG');
 const LoadingStore = useLoadingStore();
-const isChatVisible = ref(false); // 채팅 창 표시 여부
-const isMobileMenuOpen = ref(false); // 모바일 메뉴 표시 여부
+const themeStore = useThemeStore();
+const isChatVisible = ref(false);
+const isMobileMenuOpen = ref(false);
 const currentDate = ref('');
+const isDarkMode = ref(themeStore.isDarkMode);
+const isMusicVisible = ref(false);
+
+// 초기 다크 모드 클래스 보장
+if (themeStore.isDarkMode) {
+  document.body.classList.add('dark-mode');
+  document.body.classList.remove('light-mode');
+} else {
+  document.body.classList.add('light-mode');
+  document.body.classList.remove('dark-mode');
+}
+
+const toggleTheme = () => {
+  themeStore.toggleTheme();
+};
 
 const toggleChat = () => {
-  isChatVisible.value = !isChatVisible.value; // 버튼 클릭 시 토글
+  isChatVisible.value = !isChatVisible.value;
+};
+
+const toggleMusic = () => {
+  isMusicVisible.value = !isMusicVisible.value;
 };
 
 const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value; // 모바일 메뉴 토글
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
 
 const updateCurrentDate = () => {
   const now = new Date();
-  const options = { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric', 
-    weekday: 'long' 
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long'
   };
   currentDate.value = now.toLocaleDateString('ko-KR', options);
 };
@@ -103,83 +133,145 @@ const updateCurrentDate = () => {
 LoadingStore.ON();
 onMounted(() => {
   setTimeout(() => {
-    LoadingStore.OFF(); // 1.5초 후 로딩 상태 해제
+    LoadingStore.OFF();
   }, 1500);
-  
-  // 현재 날짜 표시
+
   updateCurrentDate();
-  // 매일 자정에 날짜 업데이트
   setInterval(updateCurrentDate, 86400000);
 });
 </script>
 
 <style scoped>
-/* 전체 레이아웃 */
+/* Fluid Modernism Layout */
 .common-layout {
-  background-color: #141414;
-  color: #ffffff;
-  font-family: 'Inter', Arial, sans-serif;
+  background: var(--color-bg);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
   display: flex;
   overflow: hidden;
+  position: relative;
+
+  /* Animated background */
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 60%, rgba(79, 172, 254, 0.06) 0%, transparent 50%);
+    animation: floatBackground 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glass morphism overlay */
+  &::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    backdrop-filter: var(--blur-sm);
+    pointer-events: none;
+    z-index: 1;
+  }
 }
 
-/* 사이드바 */
+/* Fluid Sidebar with Glass Morphism */
 .aside {
-  background-color: #1f1f1f;
-  color: #ffffff;
-  width: 280px; /* 고정 너비로 변경 */
-  padding: 20px 10px;
-  border-right: 0; /* 테두리 제거 */
-  box-shadow: none; /* 그림자 완전 제거 */
+  background: var(--color-surface-1);
+  backdrop-filter: var(--blur-lg);
+  color: var(--text-primary);
+  width: 280px;
+  padding: var(--space-6) var(--space-4);
+  border-right: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
   overflow-y: auto;
   z-index: 1000;
-  transition: transform 0.3s ease;
+  transition: all 0.4s var(--ease-fluid);
+
+  /* Organic border */
+  border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+
+  /* Floating effect */
+  &::before {
+    content: '';
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-2);
+    right: var(--space-2);
+    bottom: var(--space-4);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+  }
 }
 
 .aside-content {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 40px);
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
 /* 메인 컨테이너 */
 .main-container {
-  margin-left: 280px; /* 사이드바 너비와 정확히 일치 */
-  width: calc(100% - 280px); /* 나머지 전체 너비 */
+  margin-left: 280px;
+  width: calc(100% - 280px);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
   position: relative;
   height: 100vh;
-  border-left: none; /* 왼쪽 테두리 제거 */
-  background-color: #1f1f1f; /* 사이드바와 같은 배경색 */
+  border-left: none;
+  background: transparent;
 }
 
 .nav-section {
   flex-grow: 1;
-  margin-bottom: 20px;
-}
-
-.music-player-section {
-  margin-top: auto;
-  padding-top: 20px;
-  width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-6);
 }
 
 .blog-title {
-  font-size: 1.8rem;
-  font-weight: bold;
+  font-size: 1.75rem;
+  font-weight: 900;
+  font-variation-settings: 'wght' 900;
   text-align: center;
-  margin-bottom: 30px;
-  color: #ffcc00; /* 블로그 타이틀 강조 */
+  margin-bottom: var(--space-8);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  background: var(--color-primary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+  position: relative;
+
+  /* Animated underline */
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--color-accent);
+    border-radius: var(--radius-sm);
+    animation: pulse 2s ease-in-out infinite;
+  }
 }
 
 .nav-menu {
@@ -189,35 +281,89 @@ onMounted(() => {
 }
 
 .nav-menu a {
-  color: #ffffff;
+  color: var(--text-secondary);
   text-decoration: none;
-  font-size: 1.2rem;
-  padding: 10px;
-  border-radius: 8px;
-  transition: background 0.3s, color 0.3s;
+  font-size: 1.05rem;
+  font-weight: 500;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-organic);
+  transition: all 0.3s var(--ease-fluid);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  position: relative;
+  backdrop-filter: var(--blur-sm);
+
+  /* Hover glow effect */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-primary);
+    border-radius: var(--radius-organic);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-fluid);
+    z-index: -1;
+  }
 }
 
 .nav-menu a:hover {
-  background-color: #ffcc00; /* 강조 색상 */
-  color: #141414;
+  color: var(--text-primary);
+  transform: translateX(var(--space-2)) scale(1.02);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+
+  &::before {
+    opacity: 0.1;
+  }
 }
 
 .nav-menu a.router-link-active {
-  background-color: #ffcc00;
-  color: #141414;
-  font-weight: bold;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  transform: translateX(var(--space-2)) scale(1.05);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+
+  &::before {
+    opacity: 0.2;
+  }
 }
 
-/* 헤더 */
+.nav-menu a.router-link-active::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--color-accent);
+  border-radius: 2px;
+}
+
+/* Fluid Header with Glass Morphism */
 .header {
-  background: linear-gradient(90deg, #1f1f1f, #282828);
-  color: #ffffff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 헤더 그림자 */
-  border-bottom: 1px solid #2c2c2c;
+  background: var(--color-surface-1);
+  backdrop-filter: var(--blur-md);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+  border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 100;
-  padding-left: 0; /* 왼쪽 패딩 제거 */
+  padding-left: 0;
+
+  /* Floating effect */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: var(--space-2);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+  }
 }
 
 .header-content {
@@ -229,9 +375,9 @@ onMounted(() => {
 }
 
 .header-content h2 {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #ffcc00; /* 헤더 타이틀 강조 */
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -246,61 +392,39 @@ onMounted(() => {
   font-size: 0.9rem;
 }
 
-/* 메인 콘텐츠 */
+/* Fluid Main Content */
 .main {
   flex: 1;
-  padding: 0 20px 20px 0; /* 왼쪽, 위 패딩 제거 */
-  margin: 0; /* 마진 제거 */
-  background-color: #181818;
+  padding: 0 var(--space-6) var(--space-6) 0;
+  margin: 0;
+  background: transparent;
   min-height: calc(100vh - 120px);
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
   height: calc(100vh - 120px);
-  transition: background-color 0.3s ease;
+  transition: all 0.3s var(--ease-fluid);
+  z-index: 10;
 }
 
 .post-container {
-  background-color: #242424;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background: var(--color-surface-2) !important;
+  padding: var(--space-8);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-2xl), var(--shadow-glow);
   min-height: calc(100vh - 160px);
   overflow-y: auto;
   position: relative;
   height: calc(100vh - 160px);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  margin-left: 0; /* 왼쪽 마진 제거 */
+  transition: none !important;
+  margin-left: 0;
+  z-index: 1;
 }
 
-.post-title {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-  color: #ffcc00; /* 타이틀 강조 */
-}
-
-.post-excerpt {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 20px;
-  color: #cccccc; /* 부드러운 텍스트 색상 */
-}
-
-.cta-button {
-  background-color: #ffcc00; /* 주요 액션 색상 */
-  color: #141414;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.cta-button:hover {
-  background-color: #ffd633;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 버튼 그림자 */
+.post-container::before,
+.post-container::after {
+  display: none !important;
 }
 
 /* 푸터 */
@@ -308,7 +432,7 @@ onMounted(() => {
   background-color: #1f1f1f;
   color: #cccccc;
   text-align: center;
-  padding: the15px;
+  padding: 15px;
   font-size: 0.9rem;
   border-top: 1px solid #2c2c2c;
   height: 50px;
@@ -327,66 +451,227 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  background-color: #2c2c2c; /* 채팅 배경색 */
-  z-index: 1000; /* 최상위에 표시 */
+  background-color: #2c2c2c;
+  z-index: 1000;
   overflow: hidden;
 }
 
-/* 채팅 창이 사라질 때 애니메이션 */
-.chat-modal.hidden {
-  transform: translateY(20px);
-  opacity: 0;
-}
-
-/* 채팅 토글 버튼 스타일 */
+/* Fluid Chat Button */
 .chat-toggle-button {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  background-color: #ffcc00;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  width: 64px;
+  height: 64px;
+  background: var(--color-accent);
   color: white;
   border: none;
-  border-radius: 50%;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
-  z-index: 1100; /* 버튼이 항상 위에 */
+  transition: all 0.4s var(--ease-bounce);
+  z-index: 1100;
+  backdrop-filter: var(--blur-sm);
+
+  /* Pulsing animation */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: var(--color-accent);
+    border-radius: var(--radius-xl);
+    opacity: 0.3;
+    animation: pulse 2s ease-in-out infinite;
+    z-index: -1;
+  }
+}
+
+/* Music Toggle Button */
+.music-toggle-button {
+  position: fixed;
+  bottom: var(--space-6);
+  left: var(--space-6);
+  width: 64px;
+  height: 64px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.4s var(--ease-bounce);
+  z-index: 1100;
+  backdrop-filter: var(--blur-sm);
+
+  /* Pulsing animation */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: var(--color-primary);
+    border-radius: var(--radius-xl);
+    opacity: 0.3;
+    animation: musicPulse 3s ease-in-out infinite;
+    z-index: -1;
+  }
+
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--shadow-2xl), var(--shadow-glow);
+  }
+}
+
+/* Music Modal */
+.music-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.3s ease;
+}
+
+.music-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: var(--blur-md);
+}
+
+.music-modal-content {
+  background: var(--color-surface-1);
+  backdrop-filter: var(--blur-lg);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-2xl), var(--shadow-glow);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  position: relative;
+  z-index: 1201;
+  animation: modalSlideIn 0.4s var(--ease-bounce);
+
+  /* Glass morphism */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-radius: var(--radius-2xl);
+    pointer-events: none;
+  }
+}
+
+.music-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.music-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.music-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-fluid);
+  font-size: 18px;
+  font-weight: bold;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+}
+
+.music-modal-body {
+  padding: var(--space-6);
+  max-height: calc(80vh - 100px);
+  overflow-y: auto;
+}
+
+/* Modal Animations */
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes musicPulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.6; }
 }
 
 .chat-toggle-button:hover {
-  background-color: #ffd633;
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: var(--shadow-2xl), var(--shadow-glow);
 }
 
 .chat-toggle-button:active {
   transform: scale(0.95);
 }
 
-/* 모바일 메뉴 토글 버튼 스타일 */
+/* Fluid Mobile Menu Toggle */
 .mobile-menu-toggle {
-  display: none; /* 기본적으로 숨김 */
+  display: none;
   position: fixed;
-  top: 15px;
-  left: 15px;
-  width: 40px;
-  height: 40px;
-  background-color: #ffcc00;
-  color: #141414;
+  top: var(--space-4);
+  left: var(--space-4);
+  width: 44px;
+  height: 44px;
+  background: var(--color-primary);
+  color: white;
   border: none;
-  border-radius: 50%;
+  border-radius: var(--radius-lg);
   font-size: 20px;
   cursor: pointer;
   z-index: 1200;
-  transition: all 0.3s ease;
+  transition: all 0.4s var(--ease-bounce);
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  backdrop-filter: var(--blur-sm);
 }
 
 .mobile-menu-toggle:hover {
@@ -399,7 +684,7 @@ onMounted(() => {
 
 /* 사이드바 오버레이 */
 .sidebar-overlay {
-  display: none; /* 기본적으로 숨김 */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -410,37 +695,38 @@ onMounted(() => {
   transition: opacity 0.3s ease;
 }
 
-/* 스크롤바 스타일링 */
+/* Fluid Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1f1f1f;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: var(--color-accent);
+  box-shadow: var(--shadow-glow);
 }
 
 /* 반응형 디자인 */
 @media (max-width: 1200px) {
   .aside {
     width: 240px;
-    border-right: 0; /* 테두리 제거 */
-    box-shadow: none; /* 그림자 제거 */
+    border-right: 0;
+    box-shadow: none;
   }
-  
   .main-container {
     margin-left: 240px;
     width: calc(100% - 240px);
-    border-left: none; /* 왼쪽 테두리 제거 */
+    border-left: none;
   }
 }
 
@@ -450,75 +736,133 @@ onMounted(() => {
     transition: transform 0.3s ease;
     width: 240px;
   }
-  
   .main-container {
     margin-left: 0;
     width: 100%;
   }
-  
-  /* 모바일 환경에서 토글 버튼 표시 */
   .mobile-menu-toggle {
     display: flex;
   }
-  
   .aside.mobile-open {
     transform: translateX(0);
   }
-  
-  /* 사이드바가 열릴 때 오버레이 표시 */
   .sidebar-overlay {
     display: block;
   }
-  
-  /* 채팅 모달 조정 */
   .chat-modal {
     width: 90%;
     max-width: 350px;
     right: 5%;
   }
-  
   .header-content {
     padding: 0 10px;
   }
-  
   .current-date {
     display: none;
   }
-}
 
-/* 작은 모바일 기기 */
-@media (max-width: 480px) {
-  .chat-modal {
-    bottom: 70px;
-    max-height: 70vh;
-  }
-  
-  .chat-toggle-button {
-    width: 50px;
-    height: 50px;
+  /* Mobile Music Button */
+  .music-toggle-button {
+    width: 56px;
+    height: 56px;
+    bottom: var(--space-4);
+    left: var(--space-4);
     font-size: 20px;
   }
-  
-  .header-content h2 {
-    font-size: 1.2rem;
+
+  .music-modal-content {
+    width: 95%;
+    max-height: 85vh;
   }
-  
-  .blog-title {
-    font-size: 1.5rem;
-  }
-  
-  .post-container {
-    padding: 15px;
+
+  .music-modal-header,
+  .music-modal-body {
+    padding: var(--space-4);
   }
 }
 
-/* 애니메이션 */
+/* Fluid Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes floatBackground {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1deg); }
+  66% { transform: translateY(5px) rotate(-1deg); }
+}
+
+@keyframes floatParticles {
+  0%, 100% { opacity: 0.5; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.6; }
 }
 
 .post-container {
-  animation: fadeIn 0.5s ease;
+  animation: none !important;
+}
+
+/* 테마 스위치 스타일 */
+.theme-switch {
+  margin-right: 15px;
+}
+
+/* 라이트 모드 */
+.light-mode {
+  background-color: #f5f5f5;
+  color: #333333;
+}
+
+.light-mode .aside {
+  background-color: #ffffff;
+  color: #333333;
+  border-right: 1px solid #e0e0e0;
+}
+
+.light-mode .main-container {
+  background-color: #ffffff;
+}
+
+.light-mode .header {
+  background: linear-gradient(90deg, #ffffff, #f5f5f5);
+  color: #333333;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.light-mode .nav-menu a {
+  color: #333333;
+}
+
+.light-mode .nav-menu a:hover {
+  background-color: #f0f0f0;
+  color: #333333;
+}
+
+.light-mode .nav-menu a.router-link-active {
+  background-color: #e0e0e0;
+  color: #333333;
+}
+
+.light-mode .blog-title {
+  color: #666666;
+}
+
+.light-mode .header-content h2 {
+  color: #666666;
+}
+
+.light-mode .current-date {
+  color: #666666;
 }
 </style>

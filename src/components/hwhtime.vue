@@ -19,9 +19,9 @@
     </div>
 
     <!-- 진행 바 -->
-    <div class="progress-bar">
+    <div class="progress-container">
       <div
-        class="progress"
+        class="progress-bar"
         :style="{ width: progressWidth, backgroundColor: progressBarColor }"
       >
         <span class="progress-percent">{{ progressPercent }}%</span>
@@ -51,9 +51,9 @@ export default {
       timeUntilOffWork: "",
       progressWidth: "0%",
       progressPercent: 0,
-      backgroundColor: "#1e1e2f",
-      textColor: "#ffffff",
-      progressBarColor: "#ffcc00",
+      backgroundColor: "var(--color-surface-1)",
+      textColor: "var(--text-primary)",
+      progressBarColor: "var(--color-primary-solid)",
       beforeWork: true,
       afterWork: false,
       isWeekend: false,
@@ -164,50 +164,86 @@ export default {
 
 <style scoped>
 .work-timer {
+  background: var(--color-surface-1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  color: var(--text-primary);
+  min-height: 200px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
   box-sizing: border-box;
-  transition: background 0.5s ease, color 0.5s ease;
+  border: 1px solid var(--color-border);
+  backdrop-filter: var(--blur-md);
+  transition: all var(--ease-fluid) 0.3s;
+  box-shadow: var(--shadow-md);
 }
 
 .status {
   font-size: 2rem;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-6);
   text-align: center;
+  line-height: 1.2;
+  background: var(--color-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.progress-container {
+  width: 100%;
+  max-width: 350px;
+  height: 12px;
+  background: var(--color-surface-3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin: var(--space-4) 0;
+  border: 1px solid var(--color-border);
+  position: relative;
 }
 
 .progress-bar {
-  width: 80%;
-  height: 30px;
-  background-color: #333;
-  border-radius: 15px;
-  margin-top: 20px;
+  height: 100%;
+  background: var(--color-primary);
+  transition: width var(--ease-fluid) 0.5s, background-color var(--ease-fluid) 0.3s;
+  border-radius: var(--radius-sm);
+  position: relative;
   overflow: hidden;
 }
 
-.progress {
-  height: 100%;
-  background-color: #ffcc00;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: #000;
-  position: relative;
-  transition: width 1s ease; /* 애니메이션 추가 */
+.progress-percent {
+  font-size: 1rem;
+  margin-top: var(--space-2);
+  text-align: center;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
-.progress-percent {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  font-size: 1rem;
-  color: #141414;
-  top: 50%;
-  z-index: 1; /* 진행 바보다 위에 위치하도록 설정 */
+@media (max-width: 480px) {
+  .work-timer {
+    padding: var(--space-4);
+    min-height: 180px;
+  }
+
+  .status {
+    font-size: 1.8rem;
+    margin-bottom: var(--space-4);
+  }
+
+  .progress-container {
+    max-width: 300px;
+    height: 10px;
+    margin: var(--space-3) 0;
+  }
+
+  .progress-percent {
+    font-size: 0.9rem;
+    margin-top: var(--space-2);
+  }
 }
 </style>

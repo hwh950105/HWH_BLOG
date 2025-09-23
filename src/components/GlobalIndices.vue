@@ -42,16 +42,19 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 
-// API 엔드포인트 설정
-const API_ENDPOINTS = {
-  NASDAQ: "/api/nasdaq2",
-  DOW: "/api/dow2"
-};
+// API 엔드포인트 설정 (서버리스: 무료, 토큰 불필요)
+const INDICES_API = "/api/indices";
 
-// 초기 상태 - 로딩 표시
+// 초기 상태 - 로딩 표시 (카드가 바로 렌더되도록 모든 키 준비)
 const indices = ref({
   NASDAQ: { price: "로딩 중...", change: 0 },
   DOW: { price: "로딩 중...", change: 0 },
+  SP500: { price: "로딩 중...", change: 0 },
+  KOSPI: { price: "로딩 중...", change: 0 },
+  NIKKEI225: { price: "로딩 중...", change: 0 },
+  HANGSENG: { price: "로딩 중...", change: 0 },
+  FTSE100: { price: "로딩 중...", change: 0 },
+  DAX: { price: "로딩 중...", change: 0 },
 });
 const loading = ref(true);
 const error = ref("");
@@ -67,29 +70,19 @@ const fetchStockIndices = async (retry = 0) => {
   }
   
   try {
-    // API 요청
-    const [nasdaqResponse, dowResponse] = await Promise.all([
-      axios.get(API_ENDPOINTS.NASDAQ, { timeout: 5000 }),
-      axios.get(API_ENDPOINTS.DOW, { timeout: 5000 }),
-    ]);
+    const { data } = await axios.get(INDICES_API, { timeout: 6000 });
 
-    if (nasdaqResponse.data && nasdaqResponse.data.regularMarketPrice) {
-      indices.value.NASDAQ = {
-        price: nasdaqResponse.data.regularMarketPrice.toFixed(2),
-        change: ((nasdaqResponse.data.regularMarketPrice - nasdaqResponse.data.previousClose) / nasdaqResponse.data.previousClose) * 100,
-      };
-    } else {
-      throw new Error("NASDAQ 데이터 형식이 올바르지 않습니다.");
-    }
-    
-    if (dowResponse.data && dowResponse.data.regularMarketPrice) {
-      indices.value.DOW = {
-        price: dowResponse.data.regularMarketPrice.toFixed(2),
-        change: ((dowResponse.data.regularMarketPrice - dowResponse.data.previousClose) / dowResponse.data.previousClose) * 100,
-      };
-    } else {
-      throw new Error("DOW 데이터 형식이 올바르지 않습니다.");
-    }
+    const map = (x) => ({
+      price: Number(x.regularMarketPrice).toFixed(2),
+      change: ((x.regularMarketPrice - x.previousClose) / x.previousClose) * 100,
+    });
+
+    const converted = Object.fromEntries(
+      Object.entries(data || {}).map(([k, v]) => [k, map(v)])
+    );
+
+    // 기존 키 유지 + 수신 데이터만 덮어쓰기
+    indices.value = { ...indices.value, ...converted };
     
     lastUpdated.value = new Date();
     retryCount.value = 0;  // 성공하면 재시도 횟수 초기화
@@ -107,10 +100,18 @@ const fetchStockIndices = async (retry = 0) => {
     // 모든 재시도 실패 시
     error.value = "데이터를 불러오는데 실패했습니다. 잠시 후 다시 시도해 주세요.";
     retryCount.value = retry;
-    
-    // 폴백 데이터
-    indices.value.NASDAQ = { price: 15835.62, change: 1.25 };
-    indices.value.DOW = { price: 36845.25, change: -0.45 };
+
+    // 폴백 데이터 (대표 값 샘플)
+    indices.value = {
+      NASDAQ: { price: 15835.62, change: 1.25 },
+      DOW: { price: 36845.25, change: -0.45 },
+      SP500: { price: 4720.15, change: 0.32 },
+      KOSPI: { price: 2620.45, change: -0.28 },
+      NIKKEI225: { price: 36550.30, change: 0.40 },
+      HANGSENG: { price: 16680.20, change: -0.15 },
+      FTSE100: { price: 7725.10, change: 0.12 },
+      DAX: { price: 17080.55, change: 0.20 },
+    };
     
   } finally {
     if (retry === 0 || retry === MAX_RETRIES) {
@@ -154,50 +155,61 @@ onMounted(() => {
 <style scoped>
 .stock-container {
   max-width: 100%;
-  padding: 15px;
-  background-color: #2d3748;
-  color: #f7fafc;
-  border-radius: 12px;
-  min-height: 200px;
+  padding: var(--space-3);
+  background: var(--color-surface-1);
+  color: var(--text-primary);
+  border-radius: var(--radius-lg);
+  min-height: 180px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  transition: all 0.3s ease;
+  gap: var(--space-3);
+  transition: all var(--ease-fluid) 0.3s;
+  border: 1px solid var(--color-border);
+  backdrop-filter: var(--blur-md);
+  box-shadow: var(--shadow-md);
 }
 
 .stock-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .stock-header h2 {
-  font-size: 1.4rem;
+  font-size: 1rem;
   margin: 0;
-  font-weight: 600;
+  color: var(--color-primary-solid);
+  background: var(--color-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .refresh-btn {
   background: transparent;
   border: none;
-  color: #ffcc00;
+  color: var(--color-primary-solid);
   font-size: 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all var(--ease-fluid) 0.3s;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
 }
 
 .refresh-btn:hover {
-  transform: rotate(180deg);
+  transform: rotate(180deg) scale(1.1);
+  background: var(--color-surface-2);
 }
 
 .refresh-btn:disabled {
-  color: #666;
+  color: var(--text-muted);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .refresh-icon {
@@ -218,102 +230,106 @@ onMounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding: 10px;
+  gap: var(--space-4);
+  padding: var(--space-3);
 }
 
 .error-message {
   text-align: center;
-  color: #e53e3e;
+  color: var(--color-warning-solid);
   font-size: 1rem;
-  margin-top: 20px;
+  margin-top: var(--space-5);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .retry-btn {
-  background-color: #e53e3e;
-  color: white;
+  background: var(--color-warning);
+  color: var(--text-primary);
   border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--ease-fluid) 0.3s;
+  font-weight: 500;
 }
 
 .retry-btn:hover {
-  background-color: #c53030;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .stock-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+  width: 100%;
 }
 
 .stock-card {
-  background-color: #4a5568;
-  color: #e2e8f0;
-  text-align: center;
-  border-radius: 8px;
-  padding: 15px;
-  font-size: 1.1rem;
-  min-height: 80px;
+  background: var(--color-surface-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  transition: all var(--ease-fluid) 0.3s;
+  min-height: 90px;
+  border: 1px solid var(--color-border);
+  backdrop-filter: var(--blur-sm);
+}
+
+.stock-name {
+  font-size: 0.7rem;
+  color: #a0aec0;
+  margin-bottom: 4px;
+}
+
+.stock-price {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.stock-change {
+  font-size: 0.7rem;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.stock-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.stock-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-}
-
-.stock-card:has(.index-value.up)::before {
-  background-color: #48bb78;
-}
-
-.stock-card:has(.index-value.down)::before {
-  background-color: #f56565;
+  align-items: center;
+  gap: 4px;
 }
 
 .index-title {
-  font-weight: bold;
-  margin-bottom: 12px;
-  font-size: 1.2rem;
-  color: #fff;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--color-secondary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .index-value {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-3);
+  color: var(--text-primary);
 }
 
 .change-percent {
   font-size: 1rem;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: 4px;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  backdrop-filter: var(--blur-sm);
 }
 
 .change-arrow {
@@ -322,32 +338,34 @@ onMounted(() => {
 
 .last-updated {
   font-size: 0.8rem;
-  color: #a0aec0;
-  margin-top: 10px;
+  color: var(--text-muted);
+  margin-top: var(--space-3);
   text-align: right;
 }
 
 /* 상승: 녹색 */
 .index-value.up {
-  color: #48bb78;
+  color: var(--color-success-solid);
 }
 
 .index-value.up .change-percent {
-  background-color: rgba(72, 187, 120, 0.1);
+  background: var(--color-success);
+  color: var(--text-primary);
 }
 
 /* 하락: 빨간색 */
 .index-value.down {
-  color: #f56565;
+  color: var(--color-warning-solid);
 }
 
 .index-value.down .change-percent {
-  background-color: rgba(245, 101, 101, 0.1);
+  background: var(--color-warning);
+  color: var(--text-primary);
 }
 
 /* 애니메이션 효과 */
 .stock-card {
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.5s var(--ease-fluid);
 }
 
 @keyframes fadeIn {
@@ -356,33 +374,40 @@ onMounted(() => {
 }
 
 /* 반응형 디자인 */
-@media (max-width: 768px) {
-  .index-value {
-    font-size: 1.5rem;
-    flex-direction: column;
-    gap: 5px;
-  }
-  
-  .stock-card {
-    padding: 12px;
-  }
-  
-  .stock-header h2 {
-    font-size: 1.2rem;
+@media (max-width: 992px) {
+  .stock-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
   }
 }
 
 @media (max-width: 480px) {
   .stock-container {
-    padding: 10px;
+    padding: var(--space-2);
+    min-height: 160px;
   }
-  
-  .index-title {
-    font-size: 1rem;
+
+  .stock-header h2 {
+    font-size: 0.9rem;
   }
-  
-  .index-value {
-    font-size: 1.3rem;
+
+  .stock-cards { grid-template-columns: repeat(2, 1fr); }
+
+  .stock-card {
+    padding: var(--space-2);
+    min-height: 70px;
+  }
+
+  .stock-name {
+    font-size: 0.65rem;
+  }
+
+  .stock-price {
+    font-size: 0.8rem;
+  }
+
+  .stock-change {
+    font-size: 0.65rem;
   }
 }
 </style>

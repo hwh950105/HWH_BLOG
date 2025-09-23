@@ -126,36 +126,47 @@ onMounted(() => {
 <style scoped>
 
 .chat-container {
-  max-width: 450px;
-  height: 75vh;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #444;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #1e1e2f; /* 전체 배경 어두운 색상 */
-  color: #fff;
+  max-width: 450px !important;
+  height: 75vh !important;
+  margin: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  background: var(--color-surface-1) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: var(--blur-md) !important;
+  box-shadow: var(--shadow-lg) !important;
 }
 
 .chat-header {
-  background-color: #3a4046;
-  color: white;
-  padding: 5px 10px; /* 패딩을 줄임: 상하 5px, 좌우 10px */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2em; /* 폰트 크기를 줄임 */
-  font-weight: bold;
-  height: 50px; /* 명시적으로 높이 설정 */
+  background: var(--color-surface-2) !important;
+  color: var(--text-primary) !important;
+  padding: var(--space-2) var(--space-3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.2em !important;
+  font-weight: bold !important;
+  height: 50px !important;
+  border-bottom: 1px solid var(--color-divider) !important;
+}
+
+.chat-title {
+  background: var(--color-secondary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
 }
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 15px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
   max-height: 100%;
 }
 
@@ -175,74 +186,83 @@ onMounted(() => {
 }
 
 .message-card {
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-sm);
   word-wrap: break-word;
   word-break: break-word;
   white-space: pre-wrap;
   max-width: 100%;
+  backdrop-filter: var(--blur-sm);
+  border: 1px solid var(--color-border);
 }
 
 /* 본인 메시지 스타일 */
 .message.my-message .message-card {
-  background-color: #2b6cb0; /* 진한 파란색 */
-  color: #f0f4f8; /* 밝은 글자 색 */
-  border: none;
+  background: var(--color-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border-focus);
 }
 
 .message.my-message .message-timestamp {
-  color: #cbd5e0; /* 타임스탬프 연한 파란색 */
+  color: var(--text-secondary);
   font-size: 0.8em;
 }
 
 /* 상대방 메시지 스타일 */
 .message.other-message .message-card {
-  background-color: #4a5568; /* 회색 톤 */
-  color: #e2e8f0; /* 밝은 회색 글자 */
-  border: none;
+  background: var(--color-surface-3);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
 }
 
 .message.other-message .message-timestamp {
-  color: #a0aec0; /* 타임스탬프 연한 회색 */
+  color: var(--text-muted);
   font-size: 0.8em;
 }
 
 .message-user {
   font-weight: bold;
-  color: #90cdf4; /* 사용자 이름 - 밝은 파란색 */
+  color: var(--color-accent-solid);
+  background: var(--color-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .chat-input {
   display: flex;
-  gap: 10px;
-  padding: 10px;
-  background-color: #2d3748; /* 입력창 배경색 */
-  border-top: 1px solid #4a5568;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface-2);
+  border-top: 1px solid var(--color-divider);
 }
 
 .el-input__inner {
   flex: 1;
-  border-radius: 8px;
-  padding: 10px;
-  background-color: #4a5568;
-  border: none;
-  color: #f7fafc;
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  color: var(--text-primary);
 }
 
 .el-input__inner::placeholder {
-  color: #a0aec0;
+  color: var(--text-muted);
 }
 
 .el-button {
-  border-radius: 8px;
-  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-5);
   font-weight: bold;
-  background-color: #3182ce; /* 버튼 파란색 */
-  color: white;
+  background: var(--color-primary);
+  color: var(--text-primary);
+  border: none;
+  transition: all var(--ease-fluid) 0.3s;
 }
 
 .el-button:hover {
-  background-color: #2b6cb0; /* 버튼 호버 색상 */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
 }
 </style>

@@ -11,4 +11,15 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'), // '@'가 'src'를 가리키도록 설정
     },
   },
+  server: {
+    host: true,
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 });
