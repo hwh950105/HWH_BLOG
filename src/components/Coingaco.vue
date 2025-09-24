@@ -183,7 +183,7 @@ const fetchCoinPrices = async () => {
         params: {
           vs_currency: "usd",
           order: "market_cap_desc",
-          per_page: 50,
+          per_page: 100,
           page: 1,
           sparkline: false,
         },
@@ -403,6 +403,8 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--space-4);
+  width: 100%;
+  max-width: none;
 }
 
 .coin-card {
@@ -414,6 +416,7 @@ onUnmounted(() => {
   transition: all var(--ease-fluid) 0.3s;
   backdrop-filter: var(--blur-md);
   box-shadow: var(--shadow-md);
+  max-width: 400px;
 }
 
 .coin-card:hover {
@@ -455,6 +458,10 @@ onUnmounted(() => {
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 var(--space-1) 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .coin-symbol {

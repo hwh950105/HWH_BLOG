@@ -51,8 +51,9 @@ import Coingaco from '@/components/Coingaco.vue';
 }
 
 .coin-content {
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   animation: fadeInUp 0.6s var(--ease-fluid);
 }
 
