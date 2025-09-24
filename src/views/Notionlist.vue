@@ -262,7 +262,7 @@ onMounted(() => {
   items.value = [
     { index: 1, title: "vue", PageTablekey: "48373eeff05846bbb5ff00f4af92e8a8" },
     { index: 2, title: "react", PageTablekey: "765cae4b9be74ada82e6d1796fe991e3" },
-    { index: 3, title: "AI정리", PageTablekey: "2784e7142c43811d87a3000cfbb74769" },
+    { index: 3, title: "AI정리", PageTablekey: "2784e7142c4380008840db313fdbc7c8" },
   ];
 });
 // 클릭 시 PageBlocks 데이터를 로드하는 함수
