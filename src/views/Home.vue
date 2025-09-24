@@ -23,14 +23,14 @@
         <hwhtime></hwhtime>
       </div> -->
       
-      <div class="block showcase-block">
+      <!-- <div class="block showcase-block">
         <div class="block-header">
           <h3>🧭 프로젝트 & 깃허브</h3>
         </div>
         <div class="block-content">
           <ProjectShowcase />
         </div>
-      </div>
+      </div> -->
     </div>
     
     <!-- 하단 정보 그리드 -->
