@@ -865,4 +865,96 @@ onMounted(() => {
 .light-mode .current-date {
   color: #666666;
 }
+
+.light-mode .post-container {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.light-mode .mobile-menu-toggle {
+  background: var(--color-primary);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.light-mode .chat-toggle-button {
+  background: var(--color-accent);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 터치 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .nav-menu a:hover {
+    transform: none;
+  }
+
+  .nav-menu a:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+
+  .chat-toggle-button:hover {
+    transform: none;
+  }
+
+  .chat-toggle-button:active {
+    transform: scale(0.9);
+  }
+
+  .mobile-menu-toggle:active {
+    transform: scale(0.9);
+  }
+}
+
+/* 접근성 개선 */
+.nav-menu a:focus {
+  outline: 2px solid var(--color-accent-solid);
+  outline-offset: 2px;
+}
+
+.mobile-menu-toggle:focus {
+  outline: 2px solid var(--color-accent-solid);
+  outline-offset: 2px;
+}
+
+.chat-toggle-button:focus {
+  outline: 2px solid var(--color-accent-solid);
+  outline-offset: 2px;
+}
+
+/* 가로 모드 대응 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .chat-modal {
+    max-height: 60vh;
+  }
+
+  .post-container {
+    min-height: calc(100vh - 140px);
+    height: calc(100vh - 140px);
+  }
+
+  .main {
+    height: calc(100vh - 90px);
+    min-height: calc(100vh - 90px);
+  }
+}
+
+/* 성능 최적화 */
+@media (max-width: 768px) {
+  .aside,
+  .post-container,
+  .mobile-menu-toggle {
+    will-change: transform;
+  }
+
+  /* 애니메이션 간소화 */
+  .nav-menu a {
+    transition: background-color 0.2s ease, transform 0.1s ease;
+  }
+
+  .chat-toggle-button::before,
+  .music-toggle-button::before {
+    animation-duration: 3s;
+  }
+}
 </style>

@@ -374,40 +374,189 @@ onMounted(() => {
 }
 
 /* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .stock-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+
+  .index-value {
+    font-size: 1.4rem;
+  }
+
+  .change-percent {
+    font-size: 0.9rem;
+  }
+}
+
 @media (max-width: 992px) {
   .stock-cards {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .stock-card {
+    min-height: 100px;
+  }
+
+  .index-title {
+    font-size: 0.95rem;
+  }
+
+  .index-value {
+    font-size: 1.3rem;
+    flex-direction: column;
+    gap: var(--space-1);
+    text-align: center;
+  }
+
+  .change-percent {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .stock-container {
+    padding: var(--space-3);
+  }
+
+  .stock-header {
+    margin-bottom: var(--space-3);
+  }
+
+  .stock-header h2 {
+    font-size: 1rem;
+  }
+
+  .refresh-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .stock-cards {
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-2);
+  }
+
+  .stock-card {
+    padding: var(--space-3);
+    min-height: 90px;
+  }
+
+  .index-title {
+    font-size: 0.9rem;
+    margin-bottom: var(--space-1);
+  }
+
+  .index-value {
+    font-size: 1.2rem;
+  }
+
+  .change-percent {
+    font-size: 0.8rem;
+    padding: 2px var(--space-1);
+  }
+
+  .last-updated {
+    font-size: 0.7rem;
+    margin-top: var(--space-2);
   }
 }
 
 @media (max-width: 480px) {
   .stock-container {
     padding: var(--space-2);
-    min-height: 160px;
+    min-height: 140px;
+  }
+
+  .stock-header {
+    margin-bottom: var(--space-2);
   }
 
   .stock-header h2 {
     font-size: 0.9rem;
   }
 
-  .stock-cards { grid-template-columns: repeat(2, 1fr); }
+  .refresh-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .stock-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
 
   .stock-card {
     padding: var(--space-2);
-    min-height: 70px;
+    min-height: 80px;
   }
 
-  .stock-name {
-    font-size: 0.65rem;
-  }
-
-  .stock-price {
+  .index-title {
     font-size: 0.8rem;
+    margin-bottom: var(--space-1);
   }
 
-  .stock-change {
+  .index-value {
+    font-size: 1rem;
+    gap: var(--space-1);
+  }
+
+  .change-percent {
+    font-size: 0.7rem;
+    padding: 1px var(--space-1);
+  }
+
+  .change-arrow {
     font-size: 0.65rem;
+  }
+
+  .last-updated {
+    font-size: 0.65rem;
+    margin-top: var(--space-1);
+  }
+
+  .error-message {
+    font-size: 0.85rem;
+    margin-top: var(--space-3);
+  }
+
+  .retry-btn {
+    font-size: 0.8rem;
+    padding: var(--space-1) var(--space-3);
+  }
+}
+
+/* 터치 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .stock-card {
+    transition: none;
+  }
+
+  .refresh-btn:active,
+  .retry-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* 접근성 개선 */
+.refresh-btn:focus,
+.retry-btn:focus {
+  outline: 2px solid var(--color-accent-solid);
+  outline-offset: 2px;
+}
+
+/* 성능 최적화 */
+@media (max-width: 768px) {
+  .stock-card {
+    will-change: auto;
+  }
+
+  .refresh-icon.spinning {
+    animation-duration: 1.5s;
   }
 }
 </style>

@@ -847,59 +847,321 @@ onUnmounted(() => {
 }
 
 /* 반응형 디자인 */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .crypto-dashboard {
     padding: var(--space-4);
+  }
+
+  .coin-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .coin-card {
+    max-width: 350px;
+  }
+
+  .dashboard-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .crypto-dashboard {
+    padding: var(--space-3);
   }
 
   .header-content {
     flex-direction: column;
     gap: var(--space-4);
     align-items: stretch;
+    padding: var(--space-4);
+  }
+
+  .dashboard-title {
+    font-size: 1.8rem;
+    text-align: center;
+  }
+
+  .dashboard-subtitle {
+    font-size: 1rem;
+    text-align: center;
   }
 
   .header-stats {
     justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    min-width: 100px;
+    flex: 1;
   }
 
   .coin-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-3);
   }
 
+  .coin-card {
+    max-width: none;
+    padding: var(--space-4);
+  }
+
+  .coin-header {
+    margin-bottom: var(--space-3);
+  }
+
+  .coin-avatar {
+    width: 45px;
+    height: 45px;
+  }
+
+  .coin-image {
+    width: 32px;
+    height: 32px;
+  }
+
+  .coin-name {
+    font-size: 1rem;
+    max-width: 140px;
+  }
+
+  .current-price {
+    font-size: 1.6rem;
+  }
+
+  .price-change {
+    font-size: 0.9rem;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .action-btn {
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.9rem;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  /* 팝업 모바일 최적화 */
   .custom-popup-overlay {
-    padding: var(--space-3);
+    padding: var(--space-2);
+    align-items: flex-end;
   }
 
   .custom-popup-container {
-    width: 95vw;
-    height: 90vh;
+    width: 100vw;
+    height: 95vh;
     max-width: none;
     max-height: none;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    animation: slideUpMobile 0.3s ease-out;
   }
 
   .popup-header {
     padding: var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .popup-coin-info {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .popup-coin-name {
+    font-size: 1.4rem;
+  }
+
+  .popup-close-btn {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
   }
 
   .popup-body {
     padding: var(--space-4);
+    gap: var(--space-4);
   }
 
   .popup-price-grid {
     grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .popup-price-card {
+    padding: var(--space-3);
   }
 
   .popup-price-card.featured {
     grid-column: span 1;
   }
 
+  .popup-price-value.featured {
+    font-size: 1.8rem;
+  }
+
   .popup-details-grid {
     grid-template-columns: 1fr;
-    padding: var(--space-4);
+    padding: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .popup-detail-item {
+    padding: var(--space-2) 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
   }
 
   .popup-chart-wrapper {
     min-height: 250px;
+    padding: var(--space-3);
+  }
+
+  .popup-section-title {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .crypto-dashboard {
+    padding: var(--space-2);
+  }
+
+  .header-content {
+    padding: var(--space-3);
+  }
+
+  .dashboard-title {
+    font-size: 1.6rem;
+  }
+
+  .dashboard-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .coin-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .coin-card {
+    padding: var(--space-3);
+  }
+
+  .coin-name {
+    max-width: 120px;
+    font-size: 0.95rem;
+  }
+
+  .current-price {
+    font-size: 1.4rem;
+  }
+
+  .price-change {
+    font-size: 0.85rem;
+  }
+
+  .stat-row .stat-label,
+  .stat-row .stat-value {
+    font-size: 0.8rem;
+  }
+
+  .custom-popup-container {
+    height: 98vh;
+  }
+
+  .popup-header {
+    padding: var(--space-3);
+  }
+
+  .popup-coin-name {
+    font-size: 1.2rem;
+  }
+
+  .popup-body {
+    padding: var(--space-3);
+  }
+
+  .popup-price-card {
+    padding: var(--space-2);
+  }
+
+  .popup-price-value.featured {
+    font-size: 1.6rem;
+  }
+
+  .popup-chart-wrapper {
+    min-height: 200px;
+  }
+}
+
+/* 모바일 팝업 애니메이션 */
+@keyframes slideUpMobile {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 터치 피드백 */
+@media (hover: none) and (pointer: coarse) {
+  .coin-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  .action-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+
+  .popup-close-btn:active {
+    transform: scale(0.9);
+  }
+}
+
+/* 성능 최적화 */
+@media (max-width: 768px) {
+  .coin-card,
+  .custom-popup-container {
+    will-change: transform;
+  }
+
+  /* 애니메이션 간소화 */
+  .coin-card:hover {
+    transform: none;
+  }
+
+  .coin-card {
+    transition: none;
+  }
+}
+
+/* 접근성 개선 */
+.coin-card:focus {
+  outline: 2px solid var(--color-primary-solid);
+  outline-offset: 2px;
+}
+
+.action-btn:focus {
+  outline: 2px solid var(--color-accent-solid);
+  outline-offset: 2px;
+}
+
+/* 가로 모드 대응 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .custom-popup-container {
+    height: 90vh;
+  }
+
+  .popup-chart-wrapper {
+    min-height: 180px;
   }
 }
 </style>

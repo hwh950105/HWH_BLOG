@@ -11,9 +11,22 @@
       </div>
     </div>
 
+    <!-- 모바일 카테고리 탭 -->
+    <div class="mobile-category-tabs">
+      <div
+        v-for="(item, index) in items"
+        :key="item.index"
+        class="mobile-category-tab"
+        :class="{ 'active': selectedCategoryIndex === index }"
+        @click="fetchBlockData(item.PageTablekey, index)"
+      >
+        📂 {{ item.title }}
+      </div>
+    </div>
+
     <!-- 메인 워크스페이스 -->
     <div class="workspace-main">
-      <!-- 카테고리 사이드바 -->
+      <!-- 카테고리 사이드바 (데스크톱만) -->
       <div class="category-sidebar" :class="{ 'collapsed': isCategorySidebarCollapsed }" @click="isCategorySidebarCollapsed && (isCategorySidebarCollapsed = false)">
         <div class="sidebar-header">
           <div class="sidebar-title-section">
@@ -130,6 +143,40 @@
         </div>
       </div>
     </div>
+
+    <!-- 모바일 노트 리스트 버튼 -->
+    <button class="mobile-notes-btn" @click="showMobileNotesModal = true" v-if="list.length > 0">
+      📝
+    </button>
+
+    <!-- 모바일 노트 리스트 모달 -->
+    <div class="mobile-nav-overlay" :class="{ 'active': showMobileNotesModal }" @click="showMobileNotesModal = false"></div>
+    <div class="mobile-notes-modal" :class="{ 'active': showMobileNotesModal }">
+      <div class="mobile-notes-header">
+        <h3 class="mobile-notes-title">📝 노트 목록 ({{ filteredList.length }}개)</h3>
+        <button class="mobile-close-btn" @click="showMobileNotesModal = false">×</button>
+      </div>
+      <div class="mobile-notes-content">
+        <div class="notes-list">
+          <div
+            v-for="(post, index) in filteredList"
+            :key="post.id"
+            class="note-card"
+            :class="{ 'active': selectedPostIndex === index }"
+            @click="navigate(post, index); showMobileNotesModal = false"
+          >
+            <div class="note-header">
+              <h4 class="note-title">{{ post.title }}</h4>
+              <time class="note-date">{{ formatDate(post.created_time) }}</time>
+            </div>
+            <p class="note-preview">{{ truncateText(post.contents, 100) }}</p>
+            <div class="note-footer">
+              <span class="read-indicator">읽기 →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -151,6 +198,7 @@ const selectedPost = ref(null);
 const selectedCategoryIndex = ref(0);
 const isCategorySidebarCollapsed = ref(false);
 const isNotesPanelCollapsed = ref(false);
+const showMobileNotesModal = ref(false);
 
 // 검색된 노트 목록
 const filteredList = computed(() => {
@@ -905,104 +953,467 @@ const navigate = async (post, index) => {
   }
 }
 
+/* 모바일 나비게이션 버튼 */
+.mobile-nav-toggle {
+  display: none;
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 1001;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: var(--blur-sm);
+  transition: all 0.3s var(--ease-fluid);
+}
+
+.mobile-nav-toggle:active {
+  transform: scale(0.95);
+}
+
+/* 모바일 네비게이션 오버레이 */
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+.mobile-nav-overlay.active {
+  display: block;
+}
+
+/* 모바일 노트 리스트 모달 */
+.mobile-notes-modal {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-surface-1);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-2xl);
+  z-index: 1000;
+  max-height: 70vh;
+  transform: translateY(100%);
+  transition: transform 0.3s var(--ease-fluid);
+}
+
+.mobile-notes-modal.active {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(0);
+}
+
+.mobile-notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.mobile-notes-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.mobile-close-btn {
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.3s var(--ease-fluid);
+}
+
+.mobile-close-btn:hover {
+  background: var(--color-warning);
+  color: var(--text-primary);
+}
+
+.mobile-notes-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+/* 모바일 카테고리 탭 */
+.mobile-category-tabs {
+  display: none;
+  background: var(--color-surface-1);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.mobile-category-tabs::-webkit-scrollbar {
+  height: 3px;
+}
+
+.mobile-category-tabs::-webkit-scrollbar-track {
+  background: var(--color-surface-2);
+}
+
+.mobile-category-tabs::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-xs);
+}
+
+.mobile-category-tab {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  margin-right: var(--space-2);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-fluid);
+  white-space: nowrap;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  touch-action: manipulation;
+}
+
+.mobile-category-tab.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary-solid);
+  font-weight: 500;
+}
+
+.mobile-category-tab:not(.active):hover {
+  background: var(--color-surface-3);
+  border-color: var(--color-primary-solid);
+}
+
+/* 모바일 노트 버튼 */
+.mobile-notes-btn {
+  display: none;
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  background: var(--color-secondary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow-xl);
+  z-index: 100;
+  transition: all 0.3s var(--ease-fluid);
+  touch-action: manipulation;
+}
+
+.mobile-notes-btn:active {
+  transform: scale(0.9);
+}
+
 /* 반응형 디자인 */
 @media (max-width: 1400px) {
   .workspace-main {
-    grid-template-columns: 260px 380px 1fr;
+    gap: var(--space-4);
+  }
+
+  .category-sidebar {
+    width: 240px;
+  }
+
+  .notes-panel {
+    width: 300px;
   }
 }
 
 @media (max-width: 1200px) {
-  .workspace-main {
-    grid-template-columns: 240px 350px 1fr;
-    gap: var(--space-4);
-  }
-
   .header-content {
     padding: var(--space-3) var(--space-4);
   }
 
-  .header-right {
+  .workspace-title {
+    font-size: 1.6rem;
+  }
+
+  .category-sidebar {
+    width: 220px;
+  }
+
+  .notes-panel {
     width: 280px;
   }
 }
 
 @media (max-width: 1024px) {
   .workspace-main {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
-    gap: var(--space-4);
+    flex-direction: column;
     height: auto;
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - 100px);
+    gap: var(--space-3);
   }
 
   .category-sidebar {
+    width: 100%;
+    height: auto;
     order: 1;
   }
 
+  .category-sidebar.collapsed {
+    width: 100%;
+    height: 60px;
+  }
+
   .notes-panel {
-    order: 2;
+    width: 100%;
     max-height: 300px;
+    order: 2;
+  }
+
+  .notes-panel.collapsed {
+    width: 100%;
+    height: 60px;
   }
 
   .content-main {
     order: 3;
-    min-height: 500px;
+    min-height: 400px;
   }
 
   .category-list {
     flex-direction: row;
     overflow-x: auto;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-3);
+    gap: var(--space-2);
   }
 
   .category-item {
-    min-width: 200px;
+    min-width: 180px;
     flex-shrink: 0;
   }
 }
 
 @media (max-width: 768px) {
+  /* 모바일 모드 활성화 */
+  .mobile-nav-toggle,
+  .mobile-notes-btn,
+  .mobile-category-tabs {
+    display: flex;
+  }
+
+  .workspace-header {
+    position: relative;
+    z-index: 1;
+  }
+
   .workspace-main {
-    padding: var(--space-4);
-    gap: var(--space-3);
+    padding: var(--space-3);
+    gap: 0;
+    height: calc(100vh - 120px);
+  }
+
+  /* 데스크톱 사이드바 숨기기 */
+  .category-sidebar,
+  .notes-panel {
+    display: none;
+  }
+
+  /* 콘텐츠 영역을 전체 화면으로 */
+  .content-main {
+    width: 100%;
+    height: 100%;
+    order: 1;
+    margin-top: var(--space-3);
   }
 
   .header-content {
-    flex-direction: column;
-    gap: var(--space-3);
-    align-items: stretch;
-  }
-
-  .header-right {
-    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    padding-right: var(--space-16); /* 토글 버튼 공간 확보 */
   }
 
   .workspace-title {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
 
-  .category-item {
-    min-width: 160px;
-    padding: var(--space-2) var(--space-3);
-  }
-
-  .notes-panel {
-    max-height: 250px;
-  }
-
-  .content-main {
-    min-height: 400px;
+  .workspace-subtitle {
+    font-size: 0.9rem;
   }
 
   .content-header {
     flex-direction: column;
     align-items: stretch;
     gap: var(--space-3);
+    padding: var(--space-4);
   }
 
   .content-actions {
+    flex-direction: row;
     justify-content: flex-end;
+  }
+
+  .notion-content {
+    padding: var(--space-4);
+  }
+
+  /* 모바일 전용 노트 리스트 스타일 */
+  .mobile-notes-modal .note-card {
+    margin-bottom: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .mobile-notes-modal .note-title {
+    font-size: 0.95rem;
+  }
+
+  .mobile-notes-modal .note-preview {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-nav-toggle {
+    top: var(--space-3);
+    right: var(--space-3);
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .mobile-notes-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+    bottom: var(--space-3);
+    right: var(--space-3);
+  }
+
+  .workspace-main {
+    padding: var(--space-2);
+  }
+
+  .header-content {
+    padding: var(--space-3);
+    padding-right: var(--space-14);
+  }
+
+  .workspace-title {
+    font-size: 1.3rem;
+  }
+
+  .workspace-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .mobile-category-tab {
+    font-size: 0.85rem;
+    padding: var(--space-2) var(--space-3);
+    min-height: 40px;
+  }
+
+  .mobile-notes-header {
+    padding: var(--space-3);
+  }
+
+  .mobile-notes-title {
+    font-size: 1rem;
+  }
+
+  .content-header {
+    padding: var(--space-3);
+  }
+
+  .content-title {
+    font-size: 1.2rem;
+  }
+
+  .notion-content {
+    padding: var(--space-3);
+  }
+
+  .mobile-notes-modal {
+    max-height: 75vh;
+  }
+}
+
+/* 터치 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .mobile-category-tab:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+
+  .mobile-notes-modal .note-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* 접근성 개선 */
+.mobile-nav-toggle:focus,
+.mobile-notes-btn:focus,
+.mobile-close-btn:focus {
+  outline: 2px solid var(--color-accent-solid);
+  outline-offset: 2px;
+}
+
+.mobile-category-tab:focus {
+  outline: 2px solid var(--color-accent-solid);
+  outline-offset: 2px;
+}
+
+/* 가로 모드 대응 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-notes-modal {
+    max-height: 60vh;
+  }
+
+  .workspace-main {
+    height: calc(100vh - 100px);
+  }
+}
+
+/* 성능 최적화 */
+@media (max-width: 768px) {
+  .mobile-notes-modal {
+    will-change: transform;
+  }
+
+  .category-sidebar,
+  .notes-panel {
+    will-change: auto;
+  }
+
+  /* 애니메이션 간소화 */
+  .category-item,
+  .note-card {
+    transition: background-color 0.2s ease, border-color 0.2s ease;
   }
 }
 

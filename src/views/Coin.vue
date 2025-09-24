@@ -68,9 +68,28 @@ import Coingaco from '@/components/Coingaco.vue';
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .coin-page {
     padding: var(--space-4);
+  }
+
+  .page-title {
+    font-size: 2.2rem;
+  }
+
+  .page-header {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 768px) {
+  .coin-page {
+    padding: var(--space-3);
+  }
+
+  .page-header {
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
   }
 
   .page-title {
@@ -79,6 +98,25 @@ import Coingaco from '@/components/Coingaco.vue';
 
   .page-description {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .coin-page {
+    padding: var(--space-2);
+  }
+
+  .page-header {
+    padding: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+  }
+
+  .page-description {
+    font-size: 0.9rem;
   }
 }
 </style>
