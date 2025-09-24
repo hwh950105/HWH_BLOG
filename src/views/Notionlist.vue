@@ -261,7 +261,7 @@ onMounted(() => {
   fetchData();
   items.value = [
     { index: 1, title: "vue-notion", PageTablekey: "48373eeff05846bbb5ff00f4af92e8a8" },
-    { index: 2, title: "미정", PageTablekey: "1ce4e7142c43800d8305e5256b87d4b4" },
+    { index: 2, title: "미정", PageTablekey: "765cae4b9be74ada82e6d1796fe991e3" },
     { index: 3, title: "미정2", PageTablekey: "1ce4e7142c4380f39073d4c59fecd6b5" },
   ];
 });
@@ -275,12 +275,20 @@ const fetchBlockData = async (PageTablekey, categoryIndex) => {
   loadingStore.ON(); // 로딩 시작
   try {
     const value = await getPageTable(PageTablekey); // PageTablekey 기반 데이터 가져오기
-        list.value = value;
+    list.value = value;
     if (list.value?.[0]?.id && blockMaps.value == null) {
       await navigate(value[0], 0);
     }
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
+
+    // CORS 오류나 API 오류 시 빈 배열로 설정하여 UI가 깨지지 않도록 함
+    list.value = [];
+
+    // 사용자에게 오류 알림
+    if (error.message?.includes('CORS') || error.message?.includes('Failed to fetch')) {
+      console.warn('API 연결 오류: Notion API 설정을 확인해주세요.');
+    }
   } finally {
     loadingStore.OFF(); // 로딩 종료
   }
@@ -297,6 +305,14 @@ const fetchData = async () => {
     }
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
+
+    // CORS 오류나 API 오류 시 빈 배열로 설정하여 UI가 깨지지 않도록 함
+    list.value = [];
+
+    // 사용자에게 오류 알림
+    if (error.message?.includes('CORS') || error.message?.includes('Failed to fetch')) {
+      console.warn('API 연결 오류: Notion API 설정을 확인해주세요.');
+    }
   } finally {
     loadingStore.OFF();
   }
@@ -311,6 +327,14 @@ const navigate = async (post, index) => {
     blockMaps.value = blocks;
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
+
+    // API 오류 시 blockMaps를 null로 설정하여 빈 상태 화면 표시
+    blockMaps.value = null;
+
+    // 사용자에게 오류 알림
+    if (error.message?.includes('CORS') || error.message?.includes('Failed to fetch')) {
+      console.warn('API 연결 오류: Notion API 설정을 확인해주세요.');
+    }
   } finally {
     loadingStore.OFF();
   }
