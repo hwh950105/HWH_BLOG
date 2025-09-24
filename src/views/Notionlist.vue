@@ -169,7 +169,7 @@
               <h4 class="note-title">{{ post.title }}</h4>
               <time class="note-date">{{ formatDate(post.created_time) }}</time>
             </div>
-            <p class="note-preview">{{ truncateText(post.contents, 100) }}</p>
+            <p class="note-preview">{{ truncateText(post.contents, 30) }}</p>
             <div class="note-footer">
               <span class="read-indicator">읽기 →</span>
             </div>
