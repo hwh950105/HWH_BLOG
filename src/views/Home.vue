@@ -1,6 +1,6 @@
 <template>
   <div class="homemain">
-    <!-- <section class="hero">
+    <section class="hero">
       <div class="hero-content">
         <h1>오늘을 한눈에</h1>
         <p>시계, 시장 지수, 날씨까지. 필요한 정보만 깔끔하게.</p>
@@ -15,7 +15,7 @@
           </router-link>
         </div>
       </div>
-    </section> -->
+    </section>
 
     <!-- 상단 주요 정보 영역 -->
     <div class="featured-section">
