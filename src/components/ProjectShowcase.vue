@@ -42,22 +42,6 @@
           </div>
         </div>
 
-        <div class="card-footer">
-          <div class="project-stats">
-            <div class="stat">
-              <span class="stat-value">{{ getCommitCount(item.name) }}</span>
-              <span class="stat-label">commits</span>
-            </div>
-            <div class="stat">
-              <span class="stat-value">{{ getStarCount(item.name) }}</span>
-              <span class="stat-label">stars</span>
-            </div>
-          </div>
-          <div class="view-more">
-            <span>자세히 보기</span>
-            <el-icon class="arrow"><ArrowRight /></el-icon>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -69,17 +53,17 @@ import { Link, Collection, ArrowRight } from '@element-plus/icons-vue'
 const items = [
   {
     name: 'HWH BLOG',
-    description: 'Vue 3 + Vite로 만든 개인 블로그. 다크 테마와 지수/노트 뷰 제공.',
-    site: 'https://example.com',
+    description: 'Vue 3 + Vite 로 만든 개인 블로그그.',
+    site: 'http://hwh95.shop/',
     repo: 'https://github.com/yourname/hwh_blog',
     tags: ['Vue3', 'Vite', 'ElementPlus']
   },
   {
-    name: 'Stock Dashboard',
-    description: '무료 공개 API로 구현한 시장 지수 대시보드.',
-    site: 'https://example.com/stocks',
-    repo: 'https://github.com/yourname/stock-dashboard',
-    tags: ['YahooFinance', 'Serverless']
+    name: 'After School Platform',
+    description: 'Next.js + Supabase 기반의 방과후 교육 매칭/구인공고/수업/메시지/리뷰 기능을 갖춘 웹앱.',
+    site: 'https://webcode-blush.vercel.app',
+    repo: 'https://github.com/hwh950105/after_school_platform_dev',
+    tags: ['Next.js', 'Supabase', 'Vercel', 'TypeScript', 'TailwindCSS']
   },
   {
     name: 'Notes Viewer',

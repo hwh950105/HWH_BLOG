@@ -467,7 +467,12 @@ async function loadPlaylistData() {
 
   try {
     // YouTube API를 사용해서 플레이리스트 정보를 미리 가져오기
-    const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${PLAYLIST_ID}&key=YOUR_API_KEY`);
+    const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+    if (!API_KEY) {
+      console.log('YouTube API 키가 설정되지 않았습니다. 기본 플레이리스트를 사용합니다.');
+      return;
+    }
+    const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${PLAYLIST_ID}&key=${API_KEY}`);
     if (response.ok) {
       const data = await response.json();
       playlist.value = data.items.map(item => ({

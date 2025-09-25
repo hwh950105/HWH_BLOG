@@ -33,15 +33,21 @@ test_*.js
 # Development proxy server
 stock-proxy-server/
 
-# Claude configuration
+# AI/Development tools configuration
 .claude/
 .cursorrules
+.cursor/
+cursor.log
 
-# Environment files
-.env
-.env.local
-.env.development
-.env.production
+# Personal notes and documentation
+/personal/
+/notes/
+private_*
+temp_*
+
+# Environment files (Keep all .env files private)
+.env*
+!.env.example
 
 # Firebase (if not using)
 firebase.json

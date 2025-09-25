@@ -26,14 +26,37 @@ app.use(pinia);
 app.use(ElementPlus);
 app.use(router);
 
-// 컴포넌트 자동 등록
-const components = import.meta.glob('./components/*.vue', { eager: true });
+// 필요한 컴포넌트만 수동 등록
+import Loading from './components/loading.vue';
+import HWHChat from './components/HWHChat.vue';
 
-Object.entries(components).forEach(([path, module]) => {
-  const componentName = path.split('/').pop().replace('.vue', ''); // 파일 이름 추출
-  console.log('Registering component:', componentName); // 디버깅용 로그 추가
-  app.component(componentName, module.default);
-});
+app.component('Loading', Loading);
+app.component('HWHChat', HWHChat);
 
+// 글로벌 에러 핸들러
+app.config.errorHandler = (err, instance, info) => {
+  console.error('Global error:', err);
+  console.error('Error info:', info);
+
+  // 500 에러 페이지로 리다이렉트
+  if (router.currentRoute.value.name !== 'Error500') {
+    router.push('/500');
+  }
+};
+
+// API 요청 에러 처리를 위한 글로벌 함수
+app.config.globalProperties.$handleApiError = (error) => {
+  if (error.response) {
+    const status = error.response.status;
+    if (status === 404) {
+      router.push({ name: 'Error404' });
+    } else if (status >= 500) {
+      router.push({ name: 'Error500' });
+    }
+  } else if (error.request) {
+    // 네트워크 에러
+    router.push({ name: 'Error500' });
+  }
+};
 
 app.mount('#app');

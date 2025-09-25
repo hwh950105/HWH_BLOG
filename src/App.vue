@@ -81,7 +81,6 @@
 import { onMounted, ref } from "vue";
 import Loading from './components/loading.vue';
 import HWHChat from './components/HWHChat.vue';
-import YTMusicPlayer from './components/YTMusicPlayer.vue';
 import { useLoadingStore } from '@/stores/loading';
 import { useThemeStore } from '@/stores/theme';
 
@@ -92,7 +91,6 @@ const isChatVisible = ref(false);
 const isMobileMenuOpen = ref(false);
 const currentDate = ref('');
 const isDarkMode = ref(themeStore.isDarkMode);
-const isMusicVisible = ref(false);
 
 // 초기 다크 모드 클래스 보장
 if (themeStore.isDarkMode) {
@@ -111,9 +109,6 @@ const toggleChat = () => {
   isChatVisible.value = !isChatVisible.value;
 };
 
-const toggleMusic = () => {
-  isMusicVisible.value = !isMusicVisible.value;
-};
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;

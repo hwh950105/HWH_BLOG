@@ -1,13 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Vue 3 + Vite로 구축된 개인 블로그" />
+    <meta name="keywords" content="블로그, Vue3, Vite, 개발, 프로그래밍" />
+    <meta name="author" content="HWH" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="퇴근하고싶다" />
+    <meta property="og:description" content="Vue 3 + Vite로 구축된 개인 블로그" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="퇴근하고싶다" />
+    <meta property="twitter:description" content="Vue 3 + Vite로 구축된 개인 블로그" />
+
     <title>퇴근하고싶다</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/src/cssmain.css" as="style" />
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <div id="app"><!--ssr-outlet--></div>
+    <script type="module" src="/src/entry-client.js"></script>
   </body>
 </html>
