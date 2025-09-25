@@ -12,7 +12,7 @@
           <el-input
             v-model="searchQuery"
             class="global-search"
-            placeholder="노트 제목, 내용, 태그로 검색..."
+            placeholder="노트 제목, 내용으로 검색..."
             :prefix-icon="Search"
             clearable
           />
@@ -99,8 +99,8 @@
               </div>
               <p class="note-preview">{{ truncateText(post.contents, 100) }}</p>
 
-              <!-- 태그 섹션 추가 -->
-              <div v-if="post.tags && post.tags.length > 0" class="note-tags">
+              <!-- 태그 섹션 (비활성화됨) -->
+              <!-- <div v-if="post.tags && post.tags.length > 0" class="note-tags">
                 <span
                   v-for="tag in post.tags"
                   :key="tag"
@@ -111,7 +111,7 @@
                 >
                   {{ tag }}
                 </span>
-              </div>
+              </div> -->
 
               <div class="note-footer">
                 <span class="read-indicator">읽기 →</span>
@@ -193,8 +193,8 @@
             </div>
             <p class="note-preview">{{ truncateText(post.contents, 30) }}</p>
 
-            <!-- 모바일 모달용 태그 섹션 -->
-            <div v-if="post.tags && post.tags.length > 0" class="note-tags">
+            <!-- 모바일 모달용 태그 섹션 (비활성화됨) -->
+            <!-- <div v-if="post.tags && post.tags.length > 0" class="note-tags">
               <span
                 v-for="tag in post.tags"
                 :key="tag"
@@ -205,7 +205,7 @@
               >
                 {{ tag }}
               </span>
-            </div>
+            </div> -->
 
             <div class="note-footer">
               <span class="read-indicator">읽기 →</span>
@@ -254,25 +254,15 @@ const predefinedColors = [
   { bg: '#FAFAFA', text: '#424242' }  // 연한 회색
 ];
 
-// 검색된 노트 목록 (제목, 내용, 태그 검색 지원)
+// 검색된 노트 목록 (제목, 내용 검색)
 const filteredList = computed(() => {
   if (!searchQuery.value.trim()) {
     return list.value;
   }
-
-  const query = searchQuery.value.toLowerCase();
-  return list.value.filter(post => {
-    // 제목이나 내용에서 검색
-    const titleMatch = post.title.toLowerCase().includes(query);
-    const contentMatch = post.contents?.toLowerCase().includes(query);
-
-    // 태그에서 검색
-    const tagMatch = post.tags?.some(tag =>
-      tag.toLowerCase().includes(query)
-    );
-
-    return titleMatch || contentMatch || tagMatch;
-  });
+  return list.value.filter(post =>
+    post.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    post.contents.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
 });
 
 // 텍스트 자르기
@@ -444,7 +434,7 @@ const fetchBlockData = async (PageTablekey, categoryIndex) => {
   try {
     const value = await getPageTable(PageTablekey); // PageTablekey 기반 데이터 가져오기
     list.value = value;
-    addTagsToList(); // 태그 추가
+    // addTagsToList(); // 태그 추가 (비활성화됨)
     if (list.value?.[0]?.id && blockMaps.value == null) {
       await navigate(value[0], 0);
     }
@@ -469,7 +459,7 @@ const fetchData = async () => {
   try {
     const value = await getPageTable("48373eeff05846bbb5ff00f4af92e8a8");
     list.value = value;
-    addTagsToList(); // 태그 추가
+    // addTagsToList(); // 태그 추가 (비활성화됨)
     if (list.value?.[0]?.id && blockMaps.value == null) {
       await navigate(value[0], 0);
     }
