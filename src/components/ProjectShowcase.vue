@@ -65,13 +65,13 @@ const items = [
     repo: 'https://github.com/hwh950105/HWH_BLOG',
     tags: ['Next.js', 'Supabase', 'Vercel', 'TypeScript', 'TailwindCSS']
   },
-  {
-    name: 'Portfolio Website',
-    description: '개인 포트폴리오 웹사이트. 반응형 디자인과 인터랙티브 애니메이션이 특징입니다.',
-    site: 'http://hwh95.shop/',
-    repo: 'https://github.com/hwh950105/portfolio',
-    tags: ['React', 'CSS3', 'Animation', 'PWA']
-  }
+  // {
+  //   name: 'Portfolio Website',
+  //   description: '개인 포트폴리오 웹사이트. 반응형 디자인과 인터랙티브 애니메이션이 특징입니다.',
+  //   site: 'http://hwh95.shop/',
+  //   repo: 'https://github.com/hwh950105/portfolio',
+  //   tags: ['React', 'CSS3', 'Animation', 'PWA']
+  // }
 ]
 
 function openSite(url) {
