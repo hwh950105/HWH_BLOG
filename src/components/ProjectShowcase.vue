@@ -53,19 +53,25 @@ import { Link, Collection, ArrowRight } from '@element-plus/icons-vue'
 const items = [
   {
     name: 'HWH BLOG',
-    description: 'Vue 3 + Vite 로 만든 개인 블로그그.',
+    description: 'Vue 3 + Vite로 만든 개인 블로그입니다. Notion API를 활용한 블로그 시스템과 다양한 기능들을 포함합니다.',
     site: 'http://hwh95.shop/',
-    repo: 'https://github.com/yourname/hwh_blog',
-    tags: ['Vue3', 'Vite', 'ElementPlus']
+    repo: 'https://github.com/hwh950105/HWH_BLOG',
+    tags: ['Vue3', 'Vite', 'ElementPlus', 'Notion API', 'Responsive']
   },
   {
-    name: '아직 비공개 프로젝트 개발중',
-    description: 'Next.js + Supabase ',
+    name: '개발중 곧 공개',
+    description: 'Next.js + Supabase.',
     site: 'http://hwh95.shop/',
-    repo: 'https://github.com/yourname/hwh_blog',
+    repo: 'https://github.com/hwh950105/HWH_BLOG',
     tags: ['Next.js', 'Supabase', 'Vercel', 'TypeScript', 'TailwindCSS']
   },
-
+  {
+    name: 'Portfolio Website',
+    description: '개인 포트폴리오 웹사이트. 반응형 디자인과 인터랙티브 애니메이션이 특징입니다.',
+    site: 'http://hwh95.shop/',
+    repo: 'https://github.com/hwh950105/portfolio',
+    tags: ['React', 'CSS3', 'Animation', 'PWA']
+  }
 ]
 
 function openSite(url) {
@@ -76,6 +82,8 @@ function openSite(url) {
 function getProjectIcon(name) {
   const icons = {
     'HWH BLOG': '📝',
+    'After School Platform': '🎓',
+    'Portfolio Website': '💼',
     'Stock Dashboard': '📊',
     'Notes Viewer': '📚'
   }
@@ -85,23 +93,78 @@ function getProjectIcon(name) {
 function getProjectStatus(name) {
   const statuses = {
     'HWH BLOG': '운영중',
+    'After School Platform': '완료',
+    'Portfolio Website': '운영중',
     'Stock Dashboard': '완료',
     'Notes Viewer': '베타'
   }
   return statuses[name] || '개발중'
 }
 
+// 태그 색상 관리 시스템
+const tagColorMap = new Map();
+const tagColorPalette = [
+  { name: 'vue', bg: 'linear-gradient(135deg, rgba(79, 192, 141, 0.2), rgba(79, 192, 141, 0.1))', color: '#4FC08D', border: '#4FC08D' },
+  { name: 'react', bg: 'linear-gradient(135deg, rgba(97, 218, 251, 0.2), rgba(97, 218, 251, 0.1))', color: '#61DAFB', border: '#61DAFB' },
+  { name: 'next', bg: 'linear-gradient(135deg, rgba(128, 0, 128, 0.2), rgba(128, 0, 128, 0.1))', color: '#800080', border: '#800080' },
+  { name: 'typescript', bg: 'linear-gradient(135deg, rgba(49, 120, 198, 0.2), rgba(49, 120, 198, 0.1))', color: '#3178C6', border: '#3178C6' },
+  { name: 'build', bg: 'linear-gradient(135deg, rgba(255, 183, 0, 0.2), rgba(255, 183, 0, 0.1))', color: '#FFB700', border: '#FFB700' },
+  { name: 'ui', bg: 'linear-gradient(135deg, rgba(64, 158, 255, 0.2), rgba(64, 158, 255, 0.1))', color: '#409EFF', border: '#409EFF' },
+  { name: 'database', bg: 'linear-gradient(135deg, rgba(62, 175, 124, 0.2), rgba(62, 175, 124, 0.1))', color: '#3EAF7C', border: '#3EAF7C' },
+  { name: 'cloud', bg: 'linear-gradient(135deg, rgba(106, 90, 205, 0.2), rgba(106, 90, 205, 0.1))', color: '#6A5ACD', border: '#6A5ACD' },
+  { name: 'css', bg: 'linear-gradient(135deg, rgba(21, 114, 182, 0.2), rgba(21, 114, 182, 0.1))', color: '#1572B6', border: '#1572B6' },
+  { name: 'api', bg: 'linear-gradient(135deg, rgba(255, 107, 129, 0.2), rgba(255, 107, 129, 0.1))', color: '#FF6B81', border: '#FF6B81' },
+  { name: 'security', bg: 'linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.1))', color: '#DC3545', border: '#DC3545' },
+  { name: 'design', bg: 'linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(255, 105, 180, 0.1))', color: '#FF69B4', border: '#FF69B4' },
+  { name: 'mobile', bg: 'linear-gradient(135deg, rgba(255, 69, 0, 0.2), rgba(255, 69, 0, 0.1))', color: '#FF4500', border: '#FF4500' },
+  { name: 'performance', bg: 'linear-gradient(135deg, rgba(34, 139, 34, 0.2), rgba(34, 139, 34, 0.1))', color: '#228B22', border: '#228B22' },
+  { name: 'testing', bg: 'linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(138, 43, 226, 0.1))', color: '#8A2BE2', border: '#8A2BE2' },
+  { name: 'default', bg: 'linear-gradient(135deg, var(--color-surface-3), var(--color-surface-2))', color: 'var(--text-secondary)', border: 'var(--color-border)' }
+];
+
+// 모든 태그를 순서대로 수집하고 색상 할당
+function initializeTagColors() {
+  const allTags = [];
+
+  // 모든 프로젝트의 태그를 순서대로 수집
+  items.forEach(item => {
+    if (item.tags) {
+      item.tags.forEach(tag => {
+        if (!allTags.includes(tag)) {
+          allTags.push(tag);
+        }
+      });
+    }
+  });
+
+  // 순서대로 색상 할당 (default 제외)
+  const availableColorPalette = tagColorPalette.filter(color => color.name !== 'default');
+
+  allTags.forEach((tag, index) => {
+    const colorIndex = index % availableColorPalette.length;
+    const colorStyle = availableColorPalette[colorIndex];
+    tagColorMap.set(tag, colorStyle.name);
+  });
+}
+
 function getTagStyle(tag) {
-  const styles = {
-    'Vue3': 'vue',
-    'Vue': 'vue',
-    'Vite': 'build',
-    'ElementPlus': 'ui',
-    'YahooFinance': 'api',
-    'Serverless': 'cloud',
-    'Notion': 'notion'
+  // 태그 색상이 초기화되지 않았다면 초기화
+  if (tagColorMap.size === 0) {
+    initializeTagColors();
   }
-  return styles[tag] || 'default'
+
+  // 이미 할당된 색상 반환
+  if (tagColorMap.has(tag)) {
+    return tagColorMap.get(tag);
+  }
+
+  // 새로운 태그인 경우 다음 순서의 색상 할당
+  const availableColorPalette = tagColorPalette.filter(color => color.name !== 'default');
+  const nextColorIndex = tagColorMap.size % availableColorPalette.length;
+  const selectedStyle = availableColorPalette[nextColorIndex].name;
+
+  tagColorMap.set(tag, selectedStyle);
+  return selectedStyle;
 }
 
 function getCommitCount(name) {
@@ -403,6 +466,24 @@ function getStarCount(name) {
   border-color: #4FC08D;
 }
 
+.tag.react {
+  background: linear-gradient(135deg, rgba(97, 218, 251, 0.2), rgba(97, 218, 251, 0.1));
+  color: #61DAFB;
+  border-color: #61DAFB;
+}
+
+.tag.next {
+  background: linear-gradient(135deg, rgba(128, 0, 128, 0.2), rgba(128, 0, 128, 0.1));
+  color: #800080;
+  border-color: #800080;
+}
+
+.tag.typescript {
+  background: linear-gradient(135deg, rgba(49, 120, 198, 0.2), rgba(49, 120, 198, 0.1));
+  color: #3178C6;
+  border-color: #3178C6;
+}
+
 .tag.build {
   background: linear-gradient(135deg, rgba(255, 183, 0, 0.2), rgba(255, 183, 0, 0.1));
   color: #FFB700;
@@ -415,10 +496,10 @@ function getStarCount(name) {
   border-color: #409EFF;
 }
 
-.tag.api {
-  background: linear-gradient(135deg, rgba(255, 107, 129, 0.2), rgba(255, 107, 129, 0.1));
-  color: #FF6B81;
-  border-color: #FF6B81;
+.tag.database {
+  background: linear-gradient(135deg, rgba(62, 175, 124, 0.2), rgba(62, 175, 124, 0.1));
+  color: #3EAF7C;
+  border-color: #3EAF7C;
 }
 
 .tag.cloud {
@@ -427,10 +508,46 @@ function getStarCount(name) {
   border-color: #6A5ACD;
 }
 
-.tag.notion {
-  background: linear-gradient(135deg, rgba(55, 53, 47, 0.3), rgba(55, 53, 47, 0.2));
-  color: #37352F;
-  border-color: #37352F;
+.tag.css {
+  background: linear-gradient(135deg, rgba(21, 114, 182, 0.2), rgba(21, 114, 182, 0.1));
+  color: #1572B6;
+  border-color: #1572B6;
+}
+
+.tag.api {
+  background: linear-gradient(135deg, rgba(255, 107, 129, 0.2), rgba(255, 107, 129, 0.1));
+  color: #FF6B81;
+  border-color: #FF6B81;
+}
+
+.tag.security {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.1));
+  color: #DC3545;
+  border-color: #DC3545;
+}
+
+.tag.design {
+  background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(255, 105, 180, 0.1));
+  color: #FF69B4;
+  border-color: #FF69B4;
+}
+
+.tag.mobile {
+  background: linear-gradient(135deg, rgba(255, 69, 0, 0.2), rgba(255, 69, 0, 0.1));
+  color: #FF4500;
+  border-color: #FF4500;
+}
+
+.tag.performance {
+  background: linear-gradient(135deg, rgba(34, 139, 34, 0.2), rgba(34, 139, 34, 0.1));
+  color: #228B22;
+  border-color: #228B22;
+}
+
+.tag.testing {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(138, 43, 226, 0.1));
+  color: #8A2BE2;
+  border-color: #8A2BE2;
 }
 
 .tag.default {
