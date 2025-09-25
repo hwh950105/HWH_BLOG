@@ -22,13 +22,20 @@ export default defineConfig({
     // 청크 분할로 번들 최적화
     rollupOptions: {
       output: {
-        manualChunks: {
-          'element-plus': ['element-plus'],
-          'firebase': ['firebase/app', 'firebase/database', 'firebase/analytics'],
-          'vue-router': ['vue-router'],
-          'pinia': ['pinia'],
-          'chart': ['chart.js'],
-          'vue-notion': ['vue-notion'],
+        // 자동 청크 분할 사용 - external 모듈과 충돌 방지
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('element-plus')) {
+              return 'element-plus';
+            }
+            if (id.includes('chart.js')) {
+              return 'chart';
+            }
+            if (id.includes('vue-notion')) {
+              return 'vue-notion';
+            }
+            return 'vendor';
+          }
         }
       }
     },
