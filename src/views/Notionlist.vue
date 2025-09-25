@@ -112,10 +112,7 @@
               </div>
             </div>
             <div class="content-actions">
-              <el-button size="small" type="default">
-                <el-icon><Share /></el-icon>
-                공유
-              </el-button>
+  
               <el-button size="small" type="primary" @click="openFullNote">
                 <el-icon><FullScreen /></el-icon>
                 전체보기
