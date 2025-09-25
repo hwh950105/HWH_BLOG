@@ -8,6 +8,16 @@
           <p class="workspace-subtitle">다양한 주제의 노트들을 탐색해보세요</p>
         </div>
 
+        <div class="header-right">
+          <el-input
+            v-model="searchQuery"
+            class="global-search"
+            placeholder="노트 제목, 내용, 태그로 검색..."
+            :prefix-icon="Search"
+            clearable
+          />
+        </div>
+
       </div>
     </div>
 
@@ -88,6 +98,21 @@
                 <time class="note-date">{{ formatDate(post.created_time) }}</time>
               </div>
               <p class="note-preview">{{ truncateText(post.contents, 100) }}</p>
+
+              <!-- 태그 섹션 추가 -->
+              <div v-if="post.tags && post.tags.length > 0" class="note-tags">
+                <span
+                  v-for="tag in post.tags"
+                  :key="tag"
+                  class="note-tag clickable"
+                  :style="{ backgroundColor: getTagColor(tag), color: getTagTextColor(tag) }"
+                  @click.stop="filterByTag(tag)"
+                  :title="`'${tag}' 태그로 필터링`"
+                >
+                  {{ tag }}
+                </span>
+              </div>
+
               <div class="note-footer">
                 <span class="read-indicator">읽기 →</span>
               </div>
@@ -167,6 +192,21 @@
               <time class="note-date">{{ formatDate(post.created_time) }}</time>
             </div>
             <p class="note-preview">{{ truncateText(post.contents, 30) }}</p>
+
+            <!-- 모바일 모달용 태그 섹션 -->
+            <div v-if="post.tags && post.tags.length > 0" class="note-tags">
+              <span
+                v-for="tag in post.tags"
+                :key="tag"
+                class="note-tag clickable"
+                :style="{ backgroundColor: getTagColor(tag), color: getTagTextColor(tag) }"
+                @click.stop="filterByTag(tag)"
+                :title="`'${tag}' 태그로 필터링`"
+              >
+                {{ tag }}
+              </span>
+            </div>
+
             <div class="note-footer">
               <span class="read-indicator">읽기 →</span>
             </div>
@@ -197,15 +237,42 @@ const isCategorySidebarCollapsed = ref(false);
 const isNotesPanelCollapsed = ref(false);
 const showMobileNotesModal = ref(false);
 
-// 검색된 노트 목록
+// 태그 색상 관리
+const tagColors = ref(new Map());
+const predefinedColors = [
+  { bg: '#FFE4E1', text: '#8B0000' }, // 연한 빨강
+  { bg: '#E0F2F1', text: '#004D40' }, // 연한 초록
+  { bg: '#E3F2FD', text: '#1976D2' }, // 연한 파랑
+  { bg: '#FFF3E0', text: '#E65100' }, // 연한 주황
+  { bg: '#F3E5F5', text: '#7B1FA2' }, // 연한 보라
+  { bg: '#E8F5E8', text: '#2E7D32' }, // 연한 녹색
+  { bg: '#FFF8E1', text: '#F57F17' }, // 연한 노랑
+  { bg: '#FCE4EC', text: '#C2185B' }, // 연한 핑크
+  { bg: '#E1F5FE', text: '#0277BD' }, // 연한 하늘색
+  { bg: '#F1F8E9', text: '#558B2F' }, // 연한 라임
+  { bg: '#EFEBE9', text: '#5D4037' }, // 연한 갈색
+  { bg: '#FAFAFA', text: '#424242' }  // 연한 회색
+];
+
+// 검색된 노트 목록 (제목, 내용, 태그 검색 지원)
 const filteredList = computed(() => {
   if (!searchQuery.value.trim()) {
     return list.value;
   }
-  return list.value.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    post.contents.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+
+  const query = searchQuery.value.toLowerCase();
+  return list.value.filter(post => {
+    // 제목이나 내용에서 검색
+    const titleMatch = post.title.toLowerCase().includes(query);
+    const contentMatch = post.contents?.toLowerCase().includes(query);
+
+    // 태그에서 검색
+    const tagMatch = post.tags?.some(tag =>
+      tag.toLowerCase().includes(query)
+    );
+
+    return titleMatch || contentMatch || tagMatch;
+  });
 });
 
 // 텍스트 자르기
@@ -247,6 +314,110 @@ const selectFirstNote = () => {
   }
 };
 
+// 태그 색상 관리 함수들
+const getTagColor = (tag) => {
+  if (!tagColors.value.has(tag)) {
+    const colorIndex = tagColors.value.size % predefinedColors.length;
+    tagColors.value.set(tag, predefinedColors[colorIndex]);
+  }
+  return tagColors.value.get(tag).bg;
+};
+
+const getTagTextColor = (tag) => {
+  if (!tagColors.value.has(tag)) {
+    const colorIndex = tagColors.value.size % predefinedColors.length;
+    tagColors.value.set(tag, predefinedColors[colorIndex]);
+  }
+  return tagColors.value.get(tag).text;
+};
+
+// Notion 데이터에서 태그 추출 및 처리
+const addTagsToList = () => {
+  if (list.value.length > 0) {
+    list.value.forEach((post, index) => {
+      // 1. Notion 속성에서 태그 먼저 확인
+      if (post.properties && post.properties.tags) {
+        // Notion의 multi_select 속성에서 태그 추출
+        if (post.properties.tags.multi_select) {
+          post.tags = post.properties.tags.multi_select.map(tag => tag.name);
+        }
+        // select 타입인 경우
+        else if (post.properties.tags.select) {
+          post.tags = [post.properties.tags.select.name];
+        }
+      }
+      // 2. 카테고리 기반 태그 추가 (Notion 태그가 없는 경우)
+      else if (!post.tags || post.tags.length === 0) {
+        const categoryTags = {
+          0: ['Vue3', 'JavaScript', 'Frontend'], // vue 카테고리
+          1: ['React', 'JavaScript', 'Components'], // react 카테고리
+          2: ['AI', 'Machine Learning', 'Technology'] // AI정리 카테고리
+        };
+
+        // 현재 선택된 카테고리에 따라 태그 할당
+        const categoryIndex = selectedCategoryIndex.value;
+        post.tags = categoryTags[categoryIndex] || ['General', 'Notes'];
+
+        // 각 포스트마다 랜덤하게 1-3개 선택
+        const numTags = Math.floor(Math.random() * 3) + 1;
+        post.tags = post.tags.slice(0, numTags);
+      }
+
+      // 3. 제목이나 내용에서 키워드 기반 태그 자동 생성 (보조)
+      if (post.tags.length < 3) {
+        const contentKeywords = extractKeywordTags(post.title, post.contents);
+        const availableSlots = 3 - post.tags.length;
+        const additionalTags = contentKeywords.slice(0, availableSlots);
+        post.tags = [...(post.tags || []), ...additionalTags];
+      }
+    });
+  }
+};
+
+// 키워드 기반 태그 추출 함수
+const extractKeywordTags = (title, contents) => {
+  const text = (title + ' ' + (contents || '')).toLowerCase();
+  const keywordMap = {
+    'vue': 'Vue.js',
+    'react': 'React',
+    'javascript': 'JavaScript',
+    'typescript': 'TypeScript',
+    'python': 'Python',
+    'node': 'Node.js',
+    'database': 'Database',
+    'api': 'API',
+    'css': 'CSS',
+    'html': 'HTML',
+    'backend': 'Backend',
+    'frontend': 'Frontend',
+    'mobile': 'Mobile',
+    'web': 'Web',
+    'design': 'Design',
+    'ui': 'UI/UX',
+    'devops': 'DevOps',
+    'docker': 'Docker',
+    'aws': 'AWS',
+    'firebase': 'Firebase',
+    'mongodb': 'MongoDB',
+    'mysql': 'MySQL',
+    'notion': 'Notion'
+  };
+
+  const foundTags = [];
+  Object.entries(keywordMap).forEach(([keyword, tag]) => {
+    if (text.includes(keyword) && foundTags.length < 2) {
+      foundTags.push(tag);
+    }
+  });
+
+  return foundTags;
+};
+
+// 태그 필터링 함수
+const filterByTag = (tag) => {
+  searchQuery.value = tag;
+};
+
 // 전체 노트 보기
 const openFullNote = () => {
   if (selectedPost.value?.id) {
@@ -273,6 +444,7 @@ const fetchBlockData = async (PageTablekey, categoryIndex) => {
   try {
     const value = await getPageTable(PageTablekey); // PageTablekey 기반 데이터 가져오기
     list.value = value;
+    addTagsToList(); // 태그 추가
     if (list.value?.[0]?.id && blockMaps.value == null) {
       await navigate(value[0], 0);
     }
@@ -297,6 +469,7 @@ const fetchData = async () => {
   try {
     const value = await getPageTable("48373eeff05846bbb5ff00f4af92e8a8");
     list.value = value;
+    addTagsToList(); // 태그 추가
     if (list.value?.[0]?.id && blockMaps.value == null) {
       await navigate(value[0], 0);
     }
@@ -744,6 +917,44 @@ const navigate = async (post, index) => {
   color: var(--text-secondary);
   line-height: 1.4;
   margin: 0 0 var(--space-3) 0;
+}
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 var(--space-3) 0;
+}
+
+.note-tag {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--blur-xs);
+  transition: all var(--ease-fluid) 0.2s;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.note-tag.clickable {
+  cursor: pointer;
+}
+
+.note-tag:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.note-tag.clickable:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.note-tag.clickable:active {
+  transform: scale(0.95);
 }
 
 .note-footer {
@@ -1315,6 +1526,11 @@ const navigate = async (post, index) => {
   .mobile-notes-modal .note-preview {
     font-size: 0.8rem;
     line-height: 1.3;
+  }
+
+  .mobile-notes-modal .note-tag {
+    font-size: 0.65rem;
+    padding: var(--space-0-5) var(--space-1-5);
   }
 }
 

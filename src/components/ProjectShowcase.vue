@@ -59,19 +59,13 @@ const items = [
     tags: ['Vue3', 'Vite', 'ElementPlus']
   },
   {
-    name: 'After School Platform',
-    description: 'Next.js + Supabase 기반의 방과후 교육 매칭/구인공고/수업/메시지/리뷰 기능을 갖춘 웹앱.',
-    site: 'https://webcode-blush.vercel.app',
-    repo: 'https://github.com/hwh950105/after_school_platform_dev',
+    name: '아직 비공개 프로젝트 개발중',
+    description: 'Next.js + Supabase ',
+    site: 'http://hwh95.shop/',
+    repo: 'https://github.com/yourname/hwh_blog',
     tags: ['Next.js', 'Supabase', 'Vercel', 'TypeScript', 'TailwindCSS']
   },
-  {
-    name: 'Notes Viewer',
-    description: '노트 렌더링/검색 뷰어. 모바일 최적화.',
-    site: 'https://example.com/notes',
-    repo: 'https://github.com/yourname/notes-viewer',
-    tags: ['Vue', 'Notion']
-  }
+
 ]
 
 function openSite(url) {
