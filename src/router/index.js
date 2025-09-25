@@ -9,6 +9,7 @@ const Note = () => import('../views/Note.vue')
 const Notionlist = () => import('../views/Notionlist.vue')
 const Gitlist = () => import('../views/Gitlist.vue')
 const Chat = () => import('../views/Chat.vue')
+const Resume = () => import('../views/Resume.vue')
 const Error500 = () => import('../views/Error500.vue')
 const Error404 = () => import('../views/Error404.vue')
 
@@ -65,6 +66,16 @@ const routes = [
     meta: {
       title: '채팅 - 퇴근하고싶다',
       description: '실시간 채팅'
+    }
+  },
+
+  {
+    path: '/resume',
+    name: 'Resume',
+    component: Resume,
+    meta: {
+      title: '이력서 - 퇴근하고싶다',
+      description: '풀스택 개발자 황원희의 상세한 이력서입니다. 학력, 경력, 프로젝트 경험을 확인하세요.'
     }
   },
   {

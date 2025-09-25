@@ -10,6 +10,7 @@
               <router-link to="/" class="nav-link">🔥 Home</router-link>
               <!-- <router-link to="/about" class="nav-link">👋 About</router-link>
               <router-link to="/resume" class="nav-link">📄 Resume</router-link> -->
+
               <router-link to="/Coin" class="nav-link">🪙 Coin</router-link>
               <router-link to="/Notionlist" class="nav-link">🗊 Note</router-link>
               <router-link to="/Gitlist" class="nav-link">💿 Git</router-link>
