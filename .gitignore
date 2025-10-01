@@ -14,7 +14,6 @@ dist-ssr
 
 # Editor directories and files
 .vscode/*
-!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
@@ -42,6 +41,7 @@ cursor.log
 # Personal notes and documentation
 /personal/
 /notes/
+/claudedocs/
 private_*
 temp_*
 
