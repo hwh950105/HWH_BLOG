@@ -100,18 +100,18 @@
           <!-- Right Column -->
           <div class="right-column">
             <!-- Summary -->
-            <section class="resume-section">
+            <section v-if="showSummary" class="resume-section">
               <h3 class="section-title">
                 <el-icon><User /></el-icon>
                 자기소개
               </h3>
               <div class="summary-content">
-                <!-- <p>
+                <p>
                   MES/POP 중심의 현장 실무에서 5년 이상 경험을 쌓은 백엔드/서버 개발자야. C#/.NET 기반 WinForm & 서비스, .NET MVC, PostgreSQL/Oracle 등 DB, Kafka 메시징, OPC‒UA 설비 인터페이스까지 전 주기로 다뤄왔어. Vue3·Spring 기반의 Web UI 보강도 경험했고.
                 </p>
                 <p>
                   목표는 <strong>현장 데이터의 신뢰도와 가용성</strong>을 높이는 거. 장애 포인트를 빠르게 찾아 안정화하고, 유지보수성이 높은 구조로 꾸준히 개선해. 실사용자와의 커뮤니케이션, 로그/모니터링 체계, 배포 안전장치(SOP)까지 챙겨.
-                </p> -->
+                </p>
               </div>
             </section>
 
@@ -193,6 +193,7 @@ import { generateResumePDF } from '@/utils/pdfGenerator'
 
 // 상태: 인쇄 중 감지해서 인쇄용 스타일 토글
 const isPrinting = ref(false)
+const showSummary = ref(false)
 const onBeforePrint = () => (isPrinting.value = true)
 const onAfterPrint = () => (isPrinting.value = false)
 
@@ -424,20 +425,20 @@ const printResume = () => {
   box-shadow: var(--shadow-lg);
 }
 .header-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1440px;
+  margin: 0;
   padding: 0 var(--space-5);
 }
 .header-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: var(--space-6);
 }
 .profile-section {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-5);
 }
 .profile-avatar {
@@ -490,6 +491,7 @@ const printResume = () => {
 .actions-section {
   display: flex;
   gap: var(--space-3);
+  justify-content: flex-start;
 }
 
 /* Content */
@@ -497,13 +499,13 @@ const printResume = () => {
   padding: var(--space-8) 0;
 }
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1440px;
+  margin: 0;
   padding: 0 var(--space-5);
 }
 .resume-grid {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 360px 1fr;
   gap: var(--space-6);
 }
 .left-column, .right-column {
@@ -517,7 +519,7 @@ const printResume = () => {
   background: linear-gradient(135deg, var(--color-surface-1), var(--color-surface-2));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
-  padding: var(--space-6);
+  padding: var(--space-5);
   box-shadow: var(--shadow-lg);
   transition: all 0.3s var(--ease-fluid);
   position: relative;
@@ -646,11 +648,11 @@ const printResume = () => {
   gap: var(--space-6);
 }
 .experience-item {
-  border-left: 3px solid var(--color-primary-solid);
-  padding-left: var(--space-4);
+  border-left: 2px solid var(--color-primary-solid);
+  padding-left: var(--space-3);
   background: var(--color-surface-2);
   border-radius: var(--radius-xl);
-  padding: var(--space-5);
+  padding: var(--space-4);
   border: 1px solid var(--color-border);
   transition: all 0.3s var(--ease-fluid);
   position: relative;
@@ -790,14 +792,14 @@ const printResume = () => {
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
-    text-align: center;
+    text-align: left;
   }
   .profile-section {
     flex-direction: column;
-    text-align: center;
+    text-align: left;
   }
   .contact-info {
-    align-items: center;
+    align-items: flex-start;
   }
   .resume-content {
     padding: var(--space-5) 0;
@@ -834,6 +836,7 @@ const printResume = () => {
   .actions-section {
     flex-direction: column;
     width: 100%;
+    align-items: flex-start;
   }
   .skill-tags, .tech-tags {
     gap: var(--space-1);
