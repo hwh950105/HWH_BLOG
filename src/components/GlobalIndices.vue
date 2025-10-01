@@ -42,8 +42,8 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 
-// API 엔드포인트 설정 (서버리스: 무료, 토큰 불필요)
-const INDICES_API = "/api/indices";
+// API 엔드포인트 설정 (Mock API for demo)
+const INDICES_API = "/api/posts";
 
 // 초기 상태 - 로딩 표시 (카드가 바로 렌더되도록 모든 키 준비)
 const indices = ref({
@@ -68,22 +68,34 @@ const fetchStockIndices = async (retry = 0) => {
     loading.value = true;
     error.value = "";
   }
-  
+
   try {
+    // Mock API 호출 (실제 주식 API 대신 데모용)
     const { data } = await axios.get(INDICES_API, { timeout: 6000 });
 
-    const map = (x) => ({
-      price: Number(x.regularMarketPrice).toFixed(2),
-      change: ((x.regularMarketPrice - x.previousClose) / x.previousClose) * 100,
-    });
+    // 모의 주식 데이터 생성
+    const mockStockData = {
+      NASDAQ: { price: 15835.62 + (Math.random() - 0.5) * 100, change: (Math.random() - 0.5) * 4 },
+      DOW: { price: 36845.25 + (Math.random() - 0.5) * 200, change: (Math.random() - 0.5) * 3 },
+      SP500: { price: 4720.15 + (Math.random() - 0.5) * 50, change: (Math.random() - 0.5) * 2.5 },
+      KOSPI: { price: 2620.45 + (Math.random() - 0.5) * 30, change: (Math.random() - 0.5) * 3 },
+      NIKKEI225: { price: 36550.30 + (Math.random() - 0.5) * 400, change: (Math.random() - 0.5) * 2 },
+      HANGSENG: { price: 16680.20 + (Math.random() - 0.5) * 150, change: (Math.random() - 0.5) * 3.5 },
+      FTSE100: { price: 7725.10 + (Math.random() - 0.5) * 80, change: (Math.random() - 0.5) * 2 },
+      DAX: { price: 17080.55 + (Math.random() - 0.5) * 120, change: (Math.random() - 0.5) * 2.8 },
+    };
 
+    // 데이터 형식 맞추기
     const converted = Object.fromEntries(
-      Object.entries(data || {}).map(([k, v]) => [k, map(v)])
+      Object.entries(mockStockData).map(([k, v]) => [k, {
+        price: v.price.toFixed(2),
+        change: v.change
+      }])
     );
 
     // 기존 키 유지 + 수신 데이터만 덮어쓰기
     indices.value = { ...indices.value, ...converted };
-    
+
     lastUpdated.value = new Date();
     retryCount.value = 0;  // 성공하면 재시도 횟수 초기화
     

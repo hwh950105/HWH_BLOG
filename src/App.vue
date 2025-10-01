@@ -5,11 +5,11 @@
       <el-aside class="aside" width="280px" :class="{ 'mobile-open': isMobileMenuOpen }">
         <div class="aside-content">
           <div class="nav-section">
-            <h1 class="blog-title">HWH BLOG</h1>
+            <h1 class="blog-title" @click="goHome">HWH BLOG</h1>
             <nav class="nav-menu">
               <router-link to="/" class="nav-link">🔥 Home</router-link>
-              <!-- <router-link to="/about" class="nav-link">👋 About</router-link>
-              <router-link to="/resume" class="nav-link">📄 Resume</router-link> -->
+              <!-- <router-link to="/about" class="nav-link">👋 About</router-link>-->
+              <!-- <router-link to="/resume" class="nav-link">📄 Resume</router-link>  -->
 
               <router-link to="/Coin" class="nav-link">🪙 Coin</router-link>
               <router-link to="/Notionlist" class="nav-link">🗊 Note</router-link>
@@ -82,11 +82,13 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
+import { useRouter } from 'vue-router'
 import Loading from './components/loading.vue';
 import HWHChat from './components/HWHChat.vue';
 import { useLoadingStore } from '@/stores/loading';
 import { useThemeStore } from '@/stores/theme';
 
+const router = useRouter()
 const headertitle = ref('HWH BLOG');
 const LoadingStore = useLoadingStore();
 const themeStore = useThemeStore();
@@ -94,6 +96,10 @@ const isChatVisible = ref(false);
 const isMobileMenuOpen = ref(false);
 const currentDate = ref('');
 const isDarkMode = ref(themeStore.isDarkMode);
+
+const goHome = () => {
+  router.push('/');
+};
 
 // 초기 다크 모드 클래스 보장
 if (themeStore.isDarkMode) {

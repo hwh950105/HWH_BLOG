@@ -223,6 +223,7 @@ import { getPageTable, getPageBlocks, NotionRenderer } from "vue-notion";
 import { useLoadingStore } from "@/stores/loading";
 import { useRouter } from "vue-router";
 import { Search, ArrowRight, ArrowLeft, Share, FullScreen, Document } from '@element-plus/icons-vue';
+import axios from 'axios';
 
 const router = useRouter();
 const list = ref([]);
@@ -236,6 +237,89 @@ const selectedCategoryIndex = ref(0);
 const isCategorySidebarCollapsed = ref(false);
 const isNotesPanelCollapsed = ref(false);
 const showMobileNotesModal = ref(false);
+
+// Rate limiting 보호 (Notion API 기준 적용)
+const lastApiCall = ref(0);
+const API_RATE_LIMIT = 334; // 334ms = 초당 3요청 (Notion 공식 기준)
+const requestQueue = ref([]);
+const isProcessingQueue = ref(false);
+
+// 개선된 프록시 API 호출 함수 (Retry-After 헤더 지원)
+const proxyApiCall = async (url, retryCount = 0) => {
+  const maxRetries = 3;
+  const proxyUrls = [
+    'https://api.allorigins.win/get?url=',
+    'https://cors-anywhere.herokuapp.com/',
+    'https://corsproxy.io/?'
+  ];
+
+  for (const proxyUrl of proxyUrls) {
+    try {
+      let fullUrl;
+      if (proxyUrl.includes('allorigins')) {
+        fullUrl = `${proxyUrl}${encodeURIComponent(url)}`;
+      } else {
+        fullUrl = `${proxyUrl}${url}`;
+      }
+
+      console.log(`프록시 서버를 통해 API 호출 (시도 ${retryCount + 1}/${maxRetries + 1}): ${fullUrl}`);
+      const response = await axios.get(fullUrl, { timeout: 15000 });
+
+      // allorigins의 경우 데이터가 contents 필드에 있음
+      if (proxyUrl.includes('allorigins') && response.data.contents) {
+        // HTML 응답인지 체크 (에러 페이지)
+        if (response.data.contents.includes('<!DOCTYPE html>') ||
+            response.data.contents.includes('Error 1027') ||
+            response.data.contents.includes('rate limited')) {
+
+          // 429 에러인 경우 재시도 로직
+          if (response.data.contents.includes('rate limited') && retryCount < maxRetries) {
+            const retryDelay = Math.pow(2, retryCount) * 1000; // 지수 백오프
+            console.warn(`Rate limit 감지, ${retryDelay}ms 후 재시도...`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            return proxyApiCall(url, retryCount + 1);
+          }
+
+          throw new Error(`API 서버 오류: ${response.data.status?.http_code || 'Unknown'} - Cloudflare Workers 플랜 제한`);
+        }
+        return JSON.parse(response.data.contents);
+      }
+
+      // 다른 프록시들의 경우
+      if (typeof response.data === 'string' &&
+          (response.data.includes('<!DOCTYPE html>') ||
+           response.data.includes('Error') ||
+           response.data.includes('rate limited'))) {
+
+        if (response.data.includes('rate limited') && retryCount < maxRetries) {
+          const retryDelay = Math.pow(2, retryCount) * 1000;
+          console.warn(`Rate limit 감지, ${retryDelay}ms 후 재시도...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          return proxyApiCall(url, retryCount + 1);
+        }
+
+        throw new Error('API 서버가 일시적으로 사용 불가능합니다');
+      }
+
+      return response.data;
+    } catch (error) {
+      console.warn(`프록시 ${proxyUrl} 실패:`, error.message);
+
+      // 429 에러인 경우 재시도
+      if (error.response?.status === 429 && retryCount < maxRetries) {
+        const retryAfter = error.response.headers['retry-after'] || Math.pow(2, retryCount);
+        const retryDelay = parseInt(retryAfter) * 1000;
+        console.warn(`429 에러 감지, ${retryDelay}ms 후 재시도...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return proxyApiCall(url, retryCount + 1);
+      }
+
+      continue;
+    }
+  }
+
+  throw new Error(`API 호출 실패: 모든 프록시 서버에서 실패했습니다. (최대 ${maxRetries + 1}회 시도)`);
+};
 
 // 태그 색상 관리
 const tagColors = ref(new Map());
@@ -423,7 +507,57 @@ onMounted(() => {
     { index: 3, title: "AI정리", PageTablekey: "2784e7142c4380008840db313fdbc7c8" },
   ];
 });
-// 클릭 시 PageBlocks 데이터를 로드하는 함수
+// 개선된 Rate limiting 시스템 (Notion API 기준)
+const checkRateLimit = () => {
+  const now = Date.now();
+  if (now - lastApiCall.value < API_RATE_LIMIT) {
+    const waitTime = API_RATE_LIMIT - (now - lastApiCall.value);
+    console.warn(`API 요청 제한: ${waitTime}ms 후 다시 시도하세요 (초당 3요청 제한)`);
+    return false;
+  }
+  lastApiCall.value = now;
+  return true;
+};
+
+// 요청 큐 처리 시스템
+const processRequestQueue = async () => {
+  if (isProcessingQueue.value || requestQueue.value.length === 0) {
+    return;
+  }
+
+  isProcessingQueue.value = true;
+
+  while (requestQueue.value.length > 0) {
+    if (checkRateLimit()) {
+      const request = requestQueue.value.shift();
+      try {
+        const result = await request.execute();
+        request.resolve(result);
+      } catch (error) {
+        request.reject(error);
+      }
+    } else {
+      // Rate limit에 걸렸으면 잠시 대기
+      await new Promise(resolve => setTimeout(resolve, API_RATE_LIMIT));
+    }
+  }
+
+  isProcessingQueue.value = false;
+};
+
+// 큐에 요청 추가
+const queueRequest = (executeFunction) => {
+  return new Promise((resolve, reject) => {
+    requestQueue.value.push({
+      execute: executeFunction,
+      resolve,
+      reject
+    });
+    processRequestQueue();
+  });
+};
+
+// 클릭 시 PageBlocks 데이터를 로드하는 함수 (큐 시스템 적용)
 const fetchBlockData = async (PageTablekey, categoryIndex) => {
   selectedCategoryIndex.value = categoryIndex;
 
@@ -432,73 +566,88 @@ const fetchBlockData = async (PageTablekey, categoryIndex) => {
 
   loadingStore.ON(); // 로딩 시작
   try {
-    const value = await getPageTable(PageTablekey); // PageTablekey 기반 데이터 가져오기
+    // 요청 큐를 통한 API 호출
+    const value = await queueRequest(async () => {
+      const apiUrl = `https://api.vue-notion.workers.dev/v1/table/${PageTablekey}`;
+      return await proxyApiCall(apiUrl);
+    });
+
     list.value = value;
+
     // addTagsToList(); // 태그 추가 (비활성화됨)
     if (list.value?.[0]?.id && blockMaps.value == null) {
-      await navigate(value[0], 0);
+      await navigate(list.value[0], 0);
     }
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
-
-    // CORS 오류나 API 오류 시 빈 배열로 설정하여 UI가 깨지지 않도록 함
     list.value = [];
 
-    // 사용자에게 오류 알림
-    if (error.message?.includes('CORS') || error.message?.includes('Failed to fetch')) {
-      console.warn('API 연결 오류: Notion API 설정을 확인해주세요.');
+    // 사용자에게 친화적인 에러 메시지 표시
+    if (error.message.includes('플랜 제한')) {
+      console.warn('🚨 Notion API 서비스가 일시적으로 중단되었습니다. 잠시 후 다시 시도해주세요.');
+    } else if (error.message.includes('429')) {
+      console.warn('⏳ API 요청 한도를 초과했습니다. 잠시 후 자동으로 재시도됩니다.');
     }
   } finally {
     loadingStore.OFF(); // 로딩 종료
   }
 };
 
-// 기본 데이터 로드
+// 기본 데이터 로드 (큐 시스템 적용)
 const fetchData = async () => {
   loadingStore.ON();
   try {
-    const value = await getPageTable("48373eeff05846bbb5ff00f4af92e8a8");
+    // 요청 큐를 통한 API 호출
+    const value = await queueRequest(async () => {
+      const apiUrl = "https://api.vue-notion.workers.dev/v1/table/48373eeff05846bbb5ff00f4af92e8a8";
+      return await proxyApiCall(apiUrl);
+    });
+
     list.value = value;
+
     // addTagsToList(); // 태그 추가 (비활성화됨)
     if (list.value?.[0]?.id && blockMaps.value == null) {
-      await navigate(value[0], 0);
+      await navigate(list.value[0], 0);
     }
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
-
-    // CORS 오류나 API 오류 시 빈 배열로 설정하여 UI가 깨지지 않도록 함
     list.value = [];
 
-    // 사용자에게 오류 알림
-    if (error.message?.includes('CORS') || error.message?.includes('Failed to fetch')) {
-      console.warn('API 연결 오류: Notion API 설정을 확인해주세요.');
+    // 개선된 에러 처리
+    if (error.message.includes('플랜 제한')) {
+      console.warn('🚨 Notion API 서비스가 일시적으로 중단되었습니다.');
     }
   } finally {
     loadingStore.OFF();
   }
 };
 
+// 개선된 navigate 함수 (큐 시스템 적용)
 const navigate = async (post, index) => {
   selectedPostIndex.value = index;
   selectedPost.value = post;
   loadingStore.ON();
   try {
-    const blocks = await getPageBlocks(post.id);
+    // 요청 큐를 통한 API 호출
+    const blocks = await queueRequest(async () => {
+      const apiUrl = `https://api.vue-notion.workers.dev/v1/page/${post.id}`;
+      return await proxyApiCall(apiUrl);
+    });
+
     blockMaps.value = blocks;
   } catch (error) {
     console.error("데이터를 가져오는 중 오류 발생:", error);
-
-    // API 오류 시 blockMaps를 null로 설정하여 빈 상태 화면 표시
     blockMaps.value = null;
 
-    // 사용자에게 오류 알림
-    if (error.message?.includes('CORS') || error.message?.includes('Failed to fetch')) {
-      console.warn('API 연결 오류: Notion API 설정을 확인해주세요.');
+    // 사용자 친화적 에러 처리
+    if (error.message.includes('플랜 제한')) {
+      console.warn('🚨 페이지를 불러올 수 없습니다. Notion API 서비스 제한으로 인한 일시적 문제입니다.');
     }
   } finally {
     loadingStore.OFF();
   }
 };
+
 </script>
 
 <style scoped>

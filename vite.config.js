@@ -45,11 +45,17 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    },
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://jsonplaceholder.typicode.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

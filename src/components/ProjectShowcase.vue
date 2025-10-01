@@ -19,10 +19,10 @@
         <div class="card-content">
           <div class="card-header">
             <div class="project-info">
-              <div class="project-icon">{{ getProjectIcon(item.name) }}</div>
+              <div class="project-icon">{{ item.icon }}</div>
               <div>
                 <h3 class="project-name">{{ item.name }}</h3>
-                <span class="project-status">{{ getProjectStatus(item.name) }}</span>
+                <span class="project-status">{{ item.status }}</span>
               </div>
             </div>
             <div class="project-links">
@@ -54,23 +54,28 @@ const items = [
   {
     name: 'HWH BLOG',
     description: 'Vue 3 + Vite로 만든 개인 블로그입니다. Notion API를 활용한 블로그 시스템과 다양한 기능들을 포함합니다.',
-    site: 'http://hwh95.shop/',
-    repo: 'https://github.com/hwh950105/HWH_BLOG',
-    tags: ['Vue3', 'Vite', 'ElementPlus', 'Notion API', 'Responsive']
+
+    tags: ['Vue3', 'Vite', 'javaScript', 'Notion API', 'FIREBASE','Vercel'],
+    icon: '📝',
+    status: '현재페이지'
   },
   {
-    name: '개발중 곧 공개',
+    name: '방과후 플랫폼 ',
     description: 'Next.js + Supabase.',
-    site: 'http://hwh95.shop/',
-    repo: 'https://github.com/hwh950105/HWH_BLOG',
-    tags: ['Next.js', 'Supabase', 'Vercel', 'TypeScript', 'TailwindCSS']
+    site: 'https://webcode-blush.vercel.app/',
+    repo: 'https://webcode-blush.vercel.app/',
+    tags: ['Next.js', 'Supabase', 'TypeScript', 'TailwindCSS' ,'Vercel'],
+    icon: '🚀',
+    status: '개발중'
   },
   // {
   //   name: 'Portfolio Website',
   //   description: '개인 포트폴리오 웹사이트. 반응형 디자인과 인터랙티브 애니메이션이 특징입니다.',
   //   site: 'http://hwh95.shop/',
   //   repo: 'https://github.com/hwh950105/portfolio',
-  //   tags: ['React', 'CSS3', 'Animation', 'PWA']
+  //   tags: ['React', 'CSS3', 'Animation', 'PWA'],
+  //   icon: '💼',
+  //   status: '운영중'
   // }
 ]
 
@@ -79,27 +84,6 @@ function openSite(url) {
   window.open(url, '_blank', 'noopener')
 }
 
-function getProjectIcon(name) {
-  const icons = {
-    'HWH BLOG': '📝',
-    'After School Platform': '🎓',
-    'Portfolio Website': '💼',
-    'Stock Dashboard': '📊',
-    'Notes Viewer': '📚'
-  }
-  return icons[name] || '🚀'
-}
-
-function getProjectStatus(name) {
-  const statuses = {
-    'HWH BLOG': '운영중',
-    'After School Platform': '완료',
-    'Portfolio Website': '운영중',
-    'Stock Dashboard': '완료',
-    'Notes Viewer': '베타'
-  }
-  return statuses[name] || '개발중'
-}
 
 // 태그 색상 관리 시스템
 const tagColorMap = new Map();
@@ -358,7 +342,7 @@ function getStarCount(name) {
 
 .project-status {
   font-size: 0.8rem;
-  color: var(--color-accent-solid);
+  color: #ffffff;
   background: var(--color-accent);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);

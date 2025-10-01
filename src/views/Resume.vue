@@ -9,8 +9,8 @@
               <el-icon><User /></el-icon>
             </el-avatar>
             <div class="profile-info">
-              <h1 class="name">황우현 (Hwang Woo Hyun)</h1>
-              <h2 class="title">백엔드/서버 · MES/POP 개발자</h2>
+              <h1 class="name">황우현 </h1>
+              <h2 class="title">MES/POP 개발자</h2>
               <div class="contact-info">
                 <div class="contact-item">
                   <el-icon><Message /></el-icon>
@@ -106,12 +106,12 @@
                 자기소개
               </h3>
               <div class="summary-content">
-                <p>
+                <!-- <p>
                   MES/POP 중심의 현장 실무에서 5년 이상 경험을 쌓은 백엔드/서버 개발자야. C#/.NET 기반 WinForm & 서비스, .NET MVC, PostgreSQL/Oracle 등 DB, Kafka 메시징, OPC‒UA 설비 인터페이스까지 전 주기로 다뤄왔어. Vue3·Spring 기반의 Web UI 보강도 경험했고.
                 </p>
                 <p>
                   목표는 <strong>현장 데이터의 신뢰도와 가용성</strong>을 높이는 거. 장애 포인트를 빠르게 찾아 안정화하고, 유지보수성이 높은 구조로 꾸준히 개선해. 실사용자와의 커뮤니케이션, 로그/모니터링 체계, 배포 안전장치(SOP)까지 챙겨.
-                </p>
+                </p> -->
               </div>
             </section>
 
@@ -212,7 +212,7 @@ const skills = ref([
     name: 'Backend',
     skills: [
       { name: 'C# / .NET (WinForm, Service, MVC)', level: 'advanced' },
-      { name: 'Java (Spring)', level: 'intermediate' },
+      { name: 'Java', level: 'intermediate' },
       { name: 'Node.js', level: 'intermediate' }
     ]
   },
@@ -222,7 +222,7 @@ const skills = ref([
       { name: 'Vue.js', level: 'advanced' },
       { name: 'JavaScript / jQuery', level: 'advanced' },
       { name: 'Bootstrap', level: 'intermediate' },
-      { name: 'Flutter', level: 'beginner' }
+      // { name: 'Flutter', level: 'beginner' }
     ]
   },
   {
@@ -274,8 +274,8 @@ const certificates = ref([
 const experiences = ref([
   {
     id: 101,
-    title: '현대위아 MES 구축 (예정)',
-    period: '2025.01 - 2025.05 (예정)',
+    title: '현대위아 MES 구축 ',
+    period: '2025.01 - 2025.06.10',
     type: '구축',
     company: '(주)콘웰',
     description: 'PLC–MES 인터페이스 및 Web UI 구축',
@@ -410,137 +410,476 @@ const printResume = () => {
 </script>
 
 <style scoped>
-/* =====================
-   Dark Theme Variables
-   ===================== */
 .resume-page {
-  --bg: #0b1220;
-  --card: #111827;
-  --card-border: #1f2937;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --accent: #60a5fa; /* sky-400 */
-  --accent-weak: rgba(96,165,250,0.15);
-  --chip: #1f2937;
-  --chip-text: #d1d5db;
-  --shadow: 0 8px 24px rgba(0,0,0,0.35);
-
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--color-background);
+  color: var(--text-primary);
 }
 
 /* Header */
 .resume-header {
-  background: linear-gradient(180deg, rgba(96,165,250,0.12), rgba(96,165,250,0.02));
-  border-bottom: 1px solid var(--card-border);
-  padding: 40px 0;
+  background: linear-gradient(135deg, var(--color-surface-1), var(--color-surface-2));
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-8) 0;
+  box-shadow: var(--shadow-lg);
 }
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--space-5);
 }
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 30px;
+  gap: var(--space-6);
 }
-.profile-section { display: flex; align-items: center; gap: 25px; }
-.profile-avatar { border: 3px solid var(--accent); }
-.name { font-size: 2rem; font-weight: 800; color: #f3f4f6; margin-bottom: 6px; }
-.title { font-size: 1.1rem; color: var(--accent); margin-bottom: 14px; font-weight: 600; }
-.contact-info { display: flex; flex-direction: column; gap: 8px; }
-.contact-item { display: flex; align-items: center; gap: 8px; font-size: 0.92rem; color: var(--muted); }
-.contact-item a { color: var(--text); text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.15); }
-.actions-section { display: flex; gap: 12px; }
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+.profile-avatar {
+  border: 3px solid var(--color-primary-solid);
+  box-shadow: var(--shadow-md);
+}
+.name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+  background: linear-gradient(135deg, var(--color-primary-solid), var(--color-secondary-solid));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.title {
+  font-size: 1.1rem;
+  color: var(--color-accent-solid);
+  margin-bottom: var(--space-3);
+  font-weight: 600;
+}
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+.contact-item:hover {
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+.contact-item a {
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--color-border);
+  transition: all 0.3s ease;
+}
+.contact-item a:hover {
+  color: var(--color-primary-solid);
+  border-bottom-color: var(--color-primary-solid);
+}
+.actions-section {
+  display: flex;
+  gap: var(--space-3);
+}
 
 /* Content */
-.resume-content { padding: 36px 0 48px; }
-.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.resume-grid { display: grid; grid-template-columns: 320px 1fr; gap: 32px; }
-.left-column, .right-column { display: flex; flex-direction: column; gap: 24px; }
+.resume-content {
+  padding: var(--space-8) 0;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+.resume-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-6);
+}
+.left-column, .right-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
 
 /* Section */
 .resume-section {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: var(--shadow);
+  background: linear-gradient(135deg, var(--color-surface-1), var(--color-surface-2));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s var(--ease-fluid);
+  position: relative;
+  overflow: hidden;
+}
+.resume-section:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-primary-solid);
+}
+.resume-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary-solid), var(--color-secondary-solid));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.resume-section:hover::before {
+  opacity: 1;
 }
 .section-title {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 1.08rem; font-weight: 800; color: #f9fafb;
-  margin-bottom: 18px; padding-bottom: 10px;
-  border-bottom: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-primary-solid);
 }
 
 /* Skills */
-.skills-categories { display: flex; flex-direction: column; gap: 18px; }
-.skill-category { display: flex; flex-direction: column; gap: 8px; }
-.category-name { font-weight: 700; color: #e5e7eb; font-size: 0.98rem; }
-.skill-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.skill-tag { font-size: 0.78rem; background: var(--chip); border: none; color: var(--chip-text); }
+.skills-categories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.skill-category {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.category-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1rem;
+  margin-bottom: var(--space-1);
+}
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.skill-tag {
+  font-size: 0.8rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+.skill-tag:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: var(--shadow-sm);
+}
 
 /* Education & Certificates */
-.education-list, .certificates-list { display: flex; flex-direction: column; gap: 16px; }
-.education-item, .certificate-item { display: flex; gap: 14px; }
-.edu-period, .cert-date { font-size: 0.82rem; color: var(--muted); min-width: 110px; font-weight: 600; }
-.edu-school, .cert-name { font-weight: 700; color: #e5e7eb; margin-bottom: 4px; }
-.edu-major, .cert-issuer, .edu-status, .cert-score { font-size: 0.9rem; color: var(--muted); margin: 1px 0; }
+.education-list, .certificates-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.education-item, .certificate-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+.education-item:hover, .certificate-item:hover {
+  background: var(--color-surface-3);
+  border-color: var(--color-primary-solid);
+  transform: translateX(4px);
+}
+.edu-period, .cert-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  min-width: 110px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.edu-school, .cert-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+.edu-major, .cert-issuer, .edu-status, .cert-score {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 2px 0;
+}
 
 /* Summary */
-.summary-content { line-height: 1.75; color: #d1d5db; }
-.summary-content strong { color: #f3f4f6; }
-.summary-content p { margin-bottom: 12px; }
+.summary-content {
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+.summary-content strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+.summary-content p {
+  margin-bottom: var(--space-3);
+}
 
 /* Experience */
-.experience-list { display: flex; flex-direction: column; gap: 26px; }
-.experience-item { border-left: 3px solid var(--accent); padding-left: 16px; }
-.exp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
-.exp-title-group { display: flex; flex-direction: column; gap: 5px; }
-.exp-title { font-size: 1.08rem; font-weight: 800; color: #f3f4f6; }
-.exp-period { font-size: 0.9rem; color: var(--muted); }
-.exp-type { background: var(--accent-weak); color: var(--accent); padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
-.exp-company { color: var(--muted); font-weight: 600; }
-.exp-content { display: flex; flex-direction: column; gap: 12px; }
-.exp-description { color: #d1d5db; line-height: 1.6; }
-.exp-details h5, .exp-achievements h5, .exp-tech h5 { font-weight: 800; color: #e5e7eb; font-size: 0.95rem; margin: 2px 0; }
-.exp-details ul, .exp-achievements ul { margin: 0; padding-left: 18px; }
-.exp-details li, .exp-achievements li { margin-bottom: 5px; color: #d1d5db; font-size: 0.9rem; line-height: 1.5; }
-.tech-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.tech-tag { background: #0f172a; border: 1px solid #1f2937; color: #d1d5db; font-size: 0.78rem; }
-.exp-links { display: flex; gap: 10px; margin-top: 4px; }
-.link-item { display: flex; }
-.link-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; background: #0f172a; border: 1px solid #1f2937; color: #e5e7eb; text-decoration: none; }
-.link-btn:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+.experience-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.experience-item {
+  border-left: 3px solid var(--color-primary-solid);
+  padding-left: var(--space-4);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s var(--ease-fluid);
+  position: relative;
+}
+.experience-item:hover {
+  background: var(--color-surface-3);
+  border-color: var(--color-primary-solid);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.exp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.exp-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.exp-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.exp-period {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.exp-type {
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid var(--color-primary-solid);
+  transition: all 0.3s ease;
+}
+.exp-type:hover {
+  background: var(--color-primary-solid);
+  color: white;
+  transform: scale(1.05);
+}
+.exp-company {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.exp-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.exp-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.exp-details h5, .exp-achievements h5, .exp-tech h5 {
+  font-weight: 800;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  margin: var(--space-1) 0;
+}
+.exp-details ul, .exp-achievements ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.exp-details li, .exp-achievements li {
+  margin-bottom: var(--space-1);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.tech-tag {
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+.tech-tag:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary-solid);
+  color: var(--color-primary-solid);
+  transform: translateY(-1px);
+}
+.exp-links {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.link-item {
+  display: flex;
+}
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.link-btn:hover {
+  border-color: var(--color-primary-solid);
+  background: var(--color-primary);
+  color: var(--color-primary-solid);
+  box-shadow: var(--shadow-sm);
+}
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .resume-grid { grid-template-columns: 1fr; gap: 24px; }
-  .left-column { order: 2; }
-  .right-column { order: 1; }
+  .resume-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+  .left-column {
+    order: 2;
+  }
+  .right-column {
+    order: 1;
+  }
 }
+
 @media (max-width: 768px) {
-  .header-content { flex-direction: column; text-align: center; }
-  .profile-section { flex-direction: column; text-align: center; }
-  .contact-info { align-items: center; }
-  .resume-content { padding: 20px 0; }
-  .container { padding: 0 15px; }
-  .exp-header { flex-direction: column; align-items: flex-start; }
-  .exp-type { align-self: flex-start; }
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .profile-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  .contact-info {
+    align-items: center;
+  }
+  .resume-content {
+    padding: var(--space-5) 0;
+  }
+  .container {
+    padding: 0 var(--space-3);
+  }
+  .exp-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .exp-type {
+    align-self: flex-start;
+  }
+  .resume-section {
+    padding: var(--space-4);
+  }
+  .experience-item {
+    padding: var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0 var(--space-3);
+  }
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+  }
+  .name {
+    font-size: 1.6rem;
+  }
+  .actions-section {
+    flex-direction: column;
+    width: 100%;
+  }
+  .skill-tags, .tech-tags {
+    gap: var(--space-1);
+  }
+  .exp-links {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
 }
 
 /* Print */
 @media print {
-  .resume-page { background: #fff !important; color: #222 !important; }
-  .no-print { display: none !important; }
-  .resume-section { box-shadow: none !important; border: 1px solid #ddd !important; background: #fff !important; }
-  .resume-grid { grid-template-columns: 280px 1fr !important; }
-  .section-title { color: #111 !important; border-bottom-color: #666 !important; }
-  .skill-tag, .tech-tag { background: #f5f5f5 !important; color: #333 !important; border-color: #e5e5e5 !important; }
+  .resume-page {
+    background: #fff !important;
+    color: #222 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .resume-section {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    background: #fff !important;
+  }
+  .resume-section::before {
+    display: none !important;
+  }
+  .resume-grid {
+    grid-template-columns: 280px 1fr !important;
+  }
+  .section-title {
+    color: #111 !important;
+    border-bottom-color: #666 !important;
+  }
+  .skill-tag, .tech-tag {
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border-color: #e5e5e5 !important;
+  }
+  .name {
+    color: #222 !important;
+    -webkit-text-fill-color: #222 !important;
+  }
+  .education-item, .certificate-item, .experience-item {
+    background: #fff !important;
+    border-color: #ddd !important;
+  }
 }
 </style>
