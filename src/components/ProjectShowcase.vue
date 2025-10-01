@@ -11,7 +11,7 @@
         :key="item.name"
         class="project-card"
         :style="{ '--delay': index * 0.15 + 's' }"
-        @click="openSite(item.site)"
+        @click="openUrl(item)"
       >
         <div class="card-accent"></div>
         <div class="card-glow"></div>
@@ -25,7 +25,7 @@
                 <span class="project-status">{{ item.status }}</span>
               </div>
             </div>
-            <div class="project-links">
+            <div class="project-links" v-if="item.site || item.repo">
               <a v-if="item.site" :href="item.site" target="_blank" rel="noopener" class="link-btn primary" @click.stop>
                 <el-icon><Link /></el-icon>
               </a>
@@ -54,7 +54,7 @@ const items = [
   {
     name: 'HWH BLOG',
     description: 'Vue 3 + Vite로 만든 개인 블로그입니다. Notion API를 활용한 블로그 시스템과 다양한 기능들을 포함합니다.',
-
+    repo: 'https://webcode-blush.vercel.app/',
     tags: ['Vue3', 'Vite', 'javaScript', 'Notion API', 'FIREBASE','Vercel'],
     icon: '📝',
     status: '현재페이지'
@@ -79,7 +79,8 @@ const items = [
   // }
 ]
 
-function openSite(url) {
+function openUrl(item) {
+  const url = item?.site || item?.repo
   if (!url) return
   window.open(url, '_blank', 'noopener')
 }
@@ -151,23 +152,7 @@ function getTagStyle(tag) {
   return selectedStyle;
 }
 
-function getCommitCount(name) {
-  const counts = {
-    'HWH BLOG': '127',
-    'Stock Dashboard': '89',
-    'Notes Viewer': '156'
-  }
-  return counts[name] || '42'
-}
-
-function getStarCount(name) {
-  const counts = {
-    'HWH BLOG': '23',
-    'Stock Dashboard': '45',
-    'Notes Viewer': '31'
-  }
-  return counts[name] || '12'
-}
+// getCommitCount, getStarCount 함수 제거됨
 </script>
 
 <style scoped>
