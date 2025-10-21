@@ -68,15 +68,14 @@ const items = [
     icon: '🚀',
     status: '개발중'
   },
-  // {
-  //   name: 'Portfolio Website',
-  //   description: '개인 포트폴리오 웹사이트. 반응형 디자인과 인터랙티브 애니메이션이 특징입니다.',
-  //   site: 'http://hwh95.shop/',
-  //   repo: 'https://github.com/hwh950105/portfolio',
-  //   tags: ['React', 'CSS3', 'Animation', 'PWA'],
-  //   icon: '💼',
-  //   status: '운영중'
-  // }
+  {
+    name: 'WHToolkit',
+    description: 'C# 통신 라이브러리 모음',
+    repo: 'https://github.com/hwh950105/WHToolkit.git',
+    tags: ['React', 'CSS3', 'Animation', 'PWA'],
+    icon: '📝',
+    status: '개발중'
+  }
 ]
 
 function openUrl(item) {
