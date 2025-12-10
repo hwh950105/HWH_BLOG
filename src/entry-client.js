@@ -25,9 +25,13 @@ app.use(pinia)
 app.use(ElementPlus)
 app.use(router)
 
-// 컴포넌트 등록
-app.component('Loading', Loading)
-app.component('HWHChat', HWHChat)
+// 컴포넌트 등록 (HMR 중복 방지 가드)
+if (!app._context.components['Loading']) {
+  app.component('Loading', Loading)
+}
+if (!app._context.components['HWHChat']) {
+  app.component('HWHChat', HWHChat)
+}
 
 // 글로벌 에러 핸들러
 app.config.errorHandler = (err, instance, info) => {

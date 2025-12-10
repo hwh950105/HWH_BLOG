@@ -238,87 +238,113 @@ const isCategorySidebarCollapsed = ref(false);
 const isNotesPanelCollapsed = ref(false);
 const showMobileNotesModal = ref(false);
 
-// Rate limiting 보호 (Notion API 기준 적용)
+// ⚡ 성능 최적화된 API 시스템
 const lastApiCall = ref(0);
-const API_RATE_LIMIT = 334; // 334ms = 초당 3요청 (Notion 공식 기준)
-const requestQueue = ref([]);
-const isProcessingQueue = ref(false);
+const API_RATE_LIMIT = 100; // 100ms로 완화 (프록시 사용 시)
+const apiCache = ref(new Map()); // 캐싱 시스템
+const CACHE_DURATION = 5 * 60 * 1000; // 5분 캐시
 
-// 개선된 프록시 API 호출 함수 (Retry-After 헤더 지원)
-const proxyApiCall = async (url, retryCount = 0) => {
-  const maxRetries = 3;
-  const proxyUrls = [
-    'https://api.allorigins.win/get?url=',
-    'https://cors-anywhere.herokuapp.com/',
-    'https://corsproxy.io/?'
-  ];
-
-  for (const proxyUrl of proxyUrls) {
-    try {
-      let fullUrl;
-      if (proxyUrl.includes('allorigins')) {
-        fullUrl = `${proxyUrl}${encodeURIComponent(url)}`;
-      } else {
-        fullUrl = `${proxyUrl}${url}`;
-      }
-
-      console.log(`프록시 서버를 통해 API 호출 (시도 ${retryCount + 1}/${maxRetries + 1}): ${fullUrl}`);
-      const response = await axios.get(fullUrl, { timeout: 15000 });
-
-      // allorigins의 경우 데이터가 contents 필드에 있음
-      if (proxyUrl.includes('allorigins') && response.data.contents) {
-        // HTML 응답인지 체크 (에러 페이지)
-        if (response.data.contents.includes('<!DOCTYPE html>') ||
-            response.data.contents.includes('Error 1027') ||
-            response.data.contents.includes('rate limited')) {
-
-          // 429 에러인 경우 재시도 로직
-          if (response.data.contents.includes('rate limited') && retryCount < maxRetries) {
-            const retryDelay = Math.pow(2, retryCount) * 1000; // 지수 백오프
-            console.warn(`Rate limit 감지, ${retryDelay}ms 후 재시도...`);
-            await new Promise(resolve => setTimeout(resolve, retryDelay));
-            return proxyApiCall(url, retryCount + 1);
-          }
-
-          throw new Error(`API 서버 오류: ${response.data.status?.http_code || 'Unknown'} - Cloudflare Workers 플랜 제한`);
-        }
-        return JSON.parse(response.data.contents);
-      }
-
-      // 다른 프록시들의 경우
-      if (typeof response.data === 'string' &&
-          (response.data.includes('<!DOCTYPE html>') ||
-           response.data.includes('Error') ||
-           response.data.includes('rate limited'))) {
-
-        if (response.data.includes('rate limited') && retryCount < maxRetries) {
-          const retryDelay = Math.pow(2, retryCount) * 1000;
-          console.warn(`Rate limit 감지, ${retryDelay}ms 후 재시도...`);
-          await new Promise(resolve => setTimeout(resolve, retryDelay));
-          return proxyApiCall(url, retryCount + 1);
-        }
-
-        throw new Error('API 서버가 일시적으로 사용 불가능합니다');
-      }
-
-      return response.data;
-    } catch (error) {
-      console.warn(`프록시 ${proxyUrl} 실패:`, error.message);
-
-      // 429 에러인 경우 재시도
-      if (error.response?.status === 429 && retryCount < maxRetries) {
-        const retryAfter = error.response.headers['retry-after'] || Math.pow(2, retryCount);
-        const retryDelay = parseInt(retryAfter) * 1000;
-        console.warn(`429 에러 감지, ${retryDelay}ms 후 재시도...`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-        return proxyApiCall(url, retryCount + 1);
-      }
-
-      continue;
+// 캐시 정리 (메모리 관리)
+const clearOldCache = () => {
+  const now = Date.now();
+  for (const [key, value] of apiCache.value.entries()) {
+    if (now - value.timestamp > CACHE_DURATION) {
+      apiCache.value.delete(key);
     }
   }
+};
 
-  throw new Error(`API 호출 실패: 모든 프록시 서버에서 실패했습니다. (최대 ${maxRetries + 1}회 시도)`);
+// 🚀 병렬 프록시 호출 (Race 방식) - 가장 빠른 응답 사용
+const proxyApiCall = async (url, retryCount = 0) => {
+  const maxRetries = 2; // 재시도 횟수 감소
+  
+  // 캐시 확인
+  const cached = apiCache.value.get(url);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    console.log('✅ 캐시에서 데이터 로드:', url);
+    return cached.data;
+  }
+
+  const proxyConfigs = [
+    {
+      name: 'allorigins',
+      url: 'https://api.allorigins.win/get?url=',
+      timeout: 6000,
+      parser: (response) => {
+        if (response.data.contents) {
+          // 에러 체크
+          if (response.data.contents.includes('<!DOCTYPE html>') ||
+              response.data.contents.includes('Error 1027')) {
+            throw new Error('Proxy returned error page');
+          }
+          return JSON.parse(response.data.contents);
+        }
+        return response.data;
+      }
+    },
+    {
+      name: 'corsproxy',
+      url: 'https://corsproxy.io/?',
+      timeout: 6000,
+      parser: (response) => {
+        if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+          throw new Error('Proxy returned error page');
+        }
+        return response.data;
+      }
+    },
+    {
+      name: 'allorigins-backup',
+      url: 'https://api.allorigins.win/raw?url=',
+      timeout: 7000,
+      parser: (response) => response.data
+    }
+  ];
+
+  // 🏁 Race: 모든 프록시를 동시에 시도하고 가장 빠른 것 사용
+  const createProxyRequest = (config) => {
+    const fullUrl = config.url + encodeURIComponent(url);
+    
+    return axios.get(fullUrl, { 
+      timeout: config.timeout,
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(response => {
+      const parsedData = config.parser(response);
+      console.log(`✅ ${config.name} 프록시 성공 (${config.timeout}ms 타임아웃)`);
+      
+      // 성공한 데이터 캐싱
+      apiCache.value.set(url, {
+        data: parsedData,
+        timestamp: Date.now()
+      });
+      
+      return parsedData;
+    })
+    .catch(error => {
+      console.warn(`❌ ${config.name} 프록시 실패:`, error.message);
+      throw error;
+    });
+  };
+
+  try {
+    // Promise.race로 가장 빠른 프록시 사용
+    const result = await Promise.race(
+      proxyConfigs.map(config => createProxyRequest(config))
+    );
+    
+    return result;
+  } catch (error) {
+    // 모든 프록시가 실패한 경우 재시도
+    if (retryCount < maxRetries) {
+      const retryDelay = Math.pow(1.5, retryCount) * 1000; // 완화된 백오프
+      console.warn(`⏳ ${retryDelay}ms 후 재시도... (${retryCount + 1}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      return proxyApiCall(url, retryCount + 1);
+    }
+    
+    throw new Error(`API 호출 실패: 모든 프록시에서 응답 없음 (${maxRetries}회 시도)`);
+  }
 };
 
 // 태그 색상 관리
@@ -506,59 +532,39 @@ onMounted(() => {
     { index: 2, title: "react", PageTablekey: "765cae4b9be74ada82e6d1796fe991e3" },
     { index: 3, title: "AI정리", PageTablekey: "2784e7142c4380008840db313fdbc7c8" },
   ];
+  
+  // 캐시 정리 (10분마다)
+  setInterval(clearOldCache, 10 * 60 * 1000);
 });
-// 개선된 Rate limiting 시스템 (Notion API 기준)
-const checkRateLimit = () => {
+// ⚡ 간소화된 Rate limiting (병렬 처리 지원)
+const checkRateLimit = async () => {
   const now = Date.now();
-  if (now - lastApiCall.value < API_RATE_LIMIT) {
-    const waitTime = API_RATE_LIMIT - (now - lastApiCall.value);
-    console.warn(`API 요청 제한: ${waitTime}ms 후 다시 시도하세요 (초당 3요청 제한)`);
-    return false;
+  const timeSinceLastCall = now - lastApiCall.value;
+  
+  if (timeSinceLastCall < API_RATE_LIMIT) {
+    const waitTime = API_RATE_LIMIT - timeSinceLastCall;
+    await new Promise(resolve => setTimeout(resolve, waitTime));
   }
-  lastApiCall.value = now;
-  return true;
+  
+  lastApiCall.value = Date.now();
 };
 
-// 요청 큐 처리 시스템
-const processRequestQueue = async () => {
-  if (isProcessingQueue.value || requestQueue.value.length === 0) {
-    return;
+// 🚀 개선된 API 호출 래퍼 (직접 호출, 캐싱 지원)
+const queueRequest = async (executeFunction) => {
+  await checkRateLimit(); // 간단한 대기만 수행
+  
+  try {
+    const result = await executeFunction();
+    return result;
+  } catch (error) {
+    console.error('API 요청 실패:', error);
+    throw error;
   }
-
-  isProcessingQueue.value = true;
-
-  while (requestQueue.value.length > 0) {
-    if (checkRateLimit()) {
-      const request = requestQueue.value.shift();
-      try {
-        const result = await request.execute();
-        request.resolve(result);
-      } catch (error) {
-        request.reject(error);
-      }
-    } else {
-      // Rate limit에 걸렸으면 잠시 대기
-      await new Promise(resolve => setTimeout(resolve, API_RATE_LIMIT));
-    }
-  }
-
-  isProcessingQueue.value = false;
 };
 
-// 큐에 요청 추가
-const queueRequest = (executeFunction) => {
-  return new Promise((resolve, reject) => {
-    requestQueue.value.push({
-      execute: executeFunction,
-      resolve,
-      reject
-    });
-    processRequestQueue();
-  });
-};
-
-// 클릭 시 PageBlocks 데이터를 로드하는 함수 (큐 시스템 적용)
+// 🚀 카테고리 데이터 로드 (성능 최적화)
 const fetchBlockData = async (PageTablekey, categoryIndex) => {
+  const startTime = performance.now();
   selectedCategoryIndex.value = categoryIndex;
 
   // 카테고리 클릭 시 자동으로 사이드바 접기
@@ -566,20 +572,23 @@ const fetchBlockData = async (PageTablekey, categoryIndex) => {
 
   loadingStore.ON(); // 로딩 시작
   try {
-    // 요청 큐를 통한 API 호출
+    // ⚡ 최적화된 API 호출
     const value = await queueRequest(async () => {
       const apiUrl = `https://api.vue-notion.workers.dev/v1/table/${PageTablekey}`;
       return await proxyApiCall(apiUrl);
     });
 
     list.value = value;
+    
+    const loadTime = (performance.now() - startTime).toFixed(0);
+    console.log(`✅ 카테고리 로드 완료 (${loadTime}ms)`);
 
     // addTagsToList(); // 태그 추가 (비활성화됨)
     if (list.value?.[0]?.id && blockMaps.value == null) {
       await navigate(list.value[0], 0);
     }
   } catch (error) {
-    console.error("데이터를 가져오는 중 오류 발생:", error);
+    console.error("❌ 데이터를 가져오는 중 오류 발생:", error);
     list.value = [];
 
     // 사용자에게 친화적인 에러 메시지 표시
@@ -593,24 +602,28 @@ const fetchBlockData = async (PageTablekey, categoryIndex) => {
   }
 };
 
-// 기본 데이터 로드 (큐 시스템 적용)
+// 🚀 초기 데이터 로드 (성능 최적화)
 const fetchData = async () => {
+  const startTime = performance.now();
   loadingStore.ON();
   try {
-    // 요청 큐를 통한 API 호출
+    // ⚡ 최적화된 API 호출
     const value = await queueRequest(async () => {
       const apiUrl = "https://api.vue-notion.workers.dev/v1/table/48373eeff05846bbb5ff00f4af92e8a8";
       return await proxyApiCall(apiUrl);
     });
 
     list.value = value;
+    
+    const loadTime = (performance.now() - startTime).toFixed(0);
+    console.log(`✅ 초기 데이터 로드 완료 (${loadTime}ms)`);
 
     // addTagsToList(); // 태그 추가 (비활성화됨)
     if (list.value?.[0]?.id && blockMaps.value == null) {
       await navigate(list.value[0], 0);
     }
   } catch (error) {
-    console.error("데이터를 가져오는 중 오류 발생:", error);
+    console.error("❌ 데이터를 가져오는 중 오류 발생:", error);
     list.value = [];
 
     // 개선된 에러 처리
@@ -622,21 +635,25 @@ const fetchData = async () => {
   }
 };
 
-// 개선된 navigate 함수 (큐 시스템 적용)
+// 🚀 노트 네비게이션 (성능 최적화)
 const navigate = async (post, index) => {
+  const startTime = performance.now();
   selectedPostIndex.value = index;
   selectedPost.value = post;
   loadingStore.ON();
   try {
-    // 요청 큐를 통한 API 호출
+    // ⚡ 최적화된 API 호출 (캐싱 지원)
     const blocks = await queueRequest(async () => {
       const apiUrl = `https://api.vue-notion.workers.dev/v1/page/${post.id}`;
       return await proxyApiCall(apiUrl);
     });
 
     blockMaps.value = blocks;
+    
+    const loadTime = (performance.now() - startTime).toFixed(0);
+    console.log(`✅ 노트 로드 완료: "${post.title}" (${loadTime}ms)`);
   } catch (error) {
-    console.error("데이터를 가져오는 중 오류 발생:", error);
+    console.error("❌ 데이터를 가져오는 중 오류 발생:", error);
     blockMaps.value = null;
 
     // 사용자 친화적 에러 처리

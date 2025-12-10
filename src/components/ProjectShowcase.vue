@@ -54,7 +54,7 @@ const items = [
   {
     name: 'HWH BLOG',
     description: 'Vue 3 + Vite로 만든 개인 블로그입니다. Notion API를 활용한 블로그 시스템과 다양한 기능들을 포함합니다.',
-    repo: 'https://webcode-blush.vercel.app/',
+    repo: 'https://github.com/hwh950105/HWH_BLOG',
     tags: ['Vue3', 'Vite', 'javaScript', 'Notion API', 'FIREBASE','Vercel'],
     icon: '📝',
     status: '현재페이지'
@@ -70,9 +70,9 @@ const items = [
   },
   {
     name: 'WHToolkit',
-    description: 'C# 통신 라이브러리 모음',
+    description: 'C# 통신 라이브러리 모음 + 셈플 어플리케이션',
     repo: 'https://github.com/hwh950105/WHToolkit.git',
-    tags: ['C#'],
+    tags: ['C#','winform'],
     icon: '📝',
     status: '개발중'
   }

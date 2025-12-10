@@ -27,11 +27,7 @@ app.use(ElementPlus);
 app.use(router);
 
 // 필요한 컴포넌트만 수동 등록
-import Loading from './components/loading.vue';
-import HWHChat from './components/HWHChat.vue';
 
-app.component('Loading', Loading);
-app.component('HWHChat', HWHChat);
 
 // 글로벌 에러 핸들러
 app.config.errorHandler = (err, instance, info) => {
