@@ -621,9 +621,9 @@ function formatFileSize(kb) {
 
 // 프로젝트 링크 열기
 function openProjectLink(url) {
-  if (url) {
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
+  // if (url) {
+  //   window.open(url, '_blank', 'noopener,noreferrer')
+  // }
 }
 
 // 데이터 새로고침
