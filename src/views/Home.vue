@@ -34,7 +34,7 @@
     </div>
     
     <!-- 하단 정보 그리드 -->
-    <div class="dashboard-grid single">
+    <!-- <div class="dashboard-grid single">
       <div class="block market-block wide">
         <div class="block-header">
           <h3>📈 시장 지수</h3>
@@ -43,7 +43,7 @@
           <GlobalIndices></GlobalIndices>
         </div>
       </div>
-    </div>
+    </div> -->
 
   </div>
 </template>

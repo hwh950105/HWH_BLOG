@@ -1,24 +1,54 @@
 import axios from 'axios';
 
-const YF_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+// 여러 Yahoo Finance 엔드포인트 시도
+const YF_ENDPOINTS = [
+  'https://query1.finance.yahoo.com/v7/finance/quote?symbols=',
+  'https://query2.finance.yahoo.com/v7/finance/quote?symbols=',
+];
 
 const SYMBOLS = {
-  NASDAQ: '%5EIXIC',
-  DOW: '%5EDJI',
-  SP500: '%5EGSPC',
-  KOSPI: '%5EKS11',
-  NIKKEI225: '%5EN225',
-  HANGSENG: '%5EHSI',
-  FTSE100: '%5EFTSE',
-  DAX: '%5EGDAXI'
+  NASDAQ: '^IXIC',
+  DOW: '^DJI',
+  SP500: '^GSPC',
+  KOSPI: '^KS11',
+  NIKKEI225: '^N225',
+  HANGSENG: '^HSI',
+  FTSE100: '^FTSE',
+  DAX: '^GDAXI'
 };
 
 async function fetchIndex(symbolCode) {
-  const { data } = await axios.get(`${YF_BASE}${symbolCode}?region=US&lang=en-US`);
-  const meta = data?.chart?.result?.[0]?.meta;
-  if (!meta) throw new Error('Invalid Yahoo Finance response');
-  const { regularMarketPrice, previousClose } = meta;
-  return { regularMarketPrice, previousClose };
+  // 여러 엔드포인트 시도
+  for (const endpoint of YF_ENDPOINTS) {
+    try {
+      const { data } = await axios.get(`${endpoint}${symbolCode}`, {
+        timeout: 5000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json',
+        }
+      });
+      
+      const quote = data?.quoteResponse?.result?.[0];
+      if (!quote) continue;
+      
+      const { regularMarketPrice, previousClose, regularMarketChange, regularMarketChangePercent } = quote;
+      
+      if (regularMarketPrice && previousClose) {
+        return { 
+          regularMarketPrice, 
+          previousClose,
+          change: regularMarketChange || (regularMarketPrice - previousClose),
+          changePercent: regularMarketChangePercent || ((regularMarketPrice - previousClose) / previousClose * 100)
+        };
+      }
+    } catch (err) {
+      console.error(`Failed with ${endpoint}:`, err.message);
+      continue; // 다음 엔드포인트 시도
+    }
+  }
+  
+  throw new Error(`All endpoints failed for ${symbolCode}`);
 }
 
 export default async function handler(req, res) {

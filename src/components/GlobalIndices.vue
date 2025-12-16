@@ -42,10 +42,24 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 
-// API 엔드포인트 설정 (Mock API for demo)
-const INDICES_API = "/api/posts";
+// 🌐 실제 주식 시세 API 설정
+// Finnhub API (무료, 안정적)
+const FINNHUB_API_KEY = "d4si5lhr01qvsjbhtb20d4si5lhr01qvsjbhtb2g";
+const FINNHUB_BASE = "https://finnhub.io/api/v1/quote";
 
-// 초기 상태 - 로딩 표시 (카드가 바로 렌더되도록 모든 키 준비)
+// 주요 지수 추종 ETF 심볼 (실제 지수와 높은 상관관계)
+const INDEX_SYMBOLS = {
+  NASDAQ: "QQQ",        // Nasdaq-100 추종 ETF
+  DOW: "DIA",           // Dow Jones 추종 ETF
+  SP500: "SPY",         // S&P 500 추종 ETF
+  KOSPI: "EWY",         // 한국 시장 ETF
+  NIKKEI225: "EWJ",     // 일본 시장 ETF
+  HANGSENG: "EWH",      // 홍콩 시장 ETF
+  FTSE100: "EWU",       // 영국 시장 ETF
+  DAX: "EWG",           // 독일 시장 ETF
+};
+
+// 초기 상태
 const indices = ref({
   NASDAQ: { price: "로딩 중...", change: 0 },
   DOW: { price: "로딩 중...", change: 0 },
@@ -60,9 +74,9 @@ const loading = ref(true);
 const error = ref("");
 const lastUpdated = ref(new Date());
 const retryCount = ref(0);
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 2;
 
-// API 호출 함수
+// 🚀 실제 주식 데이터 가져오기 (Finnhub API)
 const fetchStockIndices = async (retry = 0) => {
   if (retry === 0) {
     loading.value = true;
@@ -70,63 +84,89 @@ const fetchStockIndices = async (retry = 0) => {
   }
 
   try {
-    // Mock API 호출 (실제 주식 API 대신 데모용)
-    const { data } = await axios.get(INDICES_API, { timeout: 6000 });
+    console.time('⏱️ fetchStockIndices');
+    console.log('📡 주식 지수 데이터 요청... (Finnhub API)');
+    
+    // 모든 ETF를 병렬로 요청
+    const promises = Object.entries(INDEX_SYMBOLS).map(async ([name, symbol]) => {
+      try {
+        const apiUrl = `${FINNHUB_BASE}?symbol=${symbol}&token=${FINNHUB_API_KEY}`;
+        const response = await axios.get(apiUrl, { timeout: 8000 });
+        
+        const data = response.data;
+        
+        // Finnhub 응답: { c: 현재가, pc: 전일종가 }
+        if (data.c && data.pc) {
+          const currentPrice = data.c;
+          const previousClose = data.pc;
+          const changePercent = ((currentPrice - previousClose) / previousClose) * 100;
 
-    // 모의 주식 데이터 생성
-    const mockStockData = {
-      NASDAQ: { price: 15835.62 + (Math.random() - 0.5) * 100, change: (Math.random() - 0.5) * 4 },
-      DOW: { price: 36845.25 + (Math.random() - 0.5) * 200, change: (Math.random() - 0.5) * 3 },
-      SP500: { price: 4720.15 + (Math.random() - 0.5) * 50, change: (Math.random() - 0.5) * 2.5 },
-      KOSPI: { price: 2620.45 + (Math.random() - 0.5) * 30, change: (Math.random() - 0.5) * 3 },
-      NIKKEI225: { price: 36550.30 + (Math.random() - 0.5) * 400, change: (Math.random() - 0.5) * 2 },
-      HANGSENG: { price: 16680.20 + (Math.random() - 0.5) * 150, change: (Math.random() - 0.5) * 3.5 },
-      FTSE100: { price: 7725.10 + (Math.random() - 0.5) * 80, change: (Math.random() - 0.5) * 2 },
-      DAX: { price: 17080.55 + (Math.random() - 0.5) * 120, change: (Math.random() - 0.5) * 2.8 },
-    };
+          return {
+            name,
+            price: currentPrice.toFixed(2),
+            change: parseFloat(changePercent.toFixed(2)),
+          };
+        }
+        return null;
+      } catch (err) {
+        console.error(`❌ ${name} 로드 실패:`, err.message);
+        return null;
+      }
+    });
 
-    // 데이터 형식 맞추기
-    const converted = Object.fromEntries(
-      Object.entries(mockStockData).map(([k, v]) => [k, {
-        price: v.price.toFixed(2),
-        change: v.change
-      }])
-    );
+    const results = await Promise.allSettled(promises);
+    const updatedIndices = {};
+    let successCount = 0;
 
-    // 기존 키 유지 + 수신 데이터만 덮어쓰기
-    indices.value = { ...indices.value, ...converted };
-
-    lastUpdated.value = new Date();
-    retryCount.value = 0;  // 성공하면 재시도 횟수 초기화
+    results.forEach((result) => {
+      if (result.status === 'fulfilled' && result.value) {
+        const { name, price, change } = result.value;
+        updatedIndices[name] = { price, change };
+        successCount++;
+      }
+    });
+    
+    if (successCount > 0) {
+      indices.value = { ...indices.value, ...updatedIndices };
+      lastUpdated.value = new Date();
+      retryCount.value = 0;
+      error.value = "";
+      
+      console.log(`✅ 주식 데이터 로드 완료 (${successCount}/8개 지수)`);
+      console.timeEnd('⏱️ fetchStockIndices');
+    } else {
+      throw new Error("모든 지수 데이터 로드 실패");
+    }
     
   } catch (err) {
-    console.error("API 호출 오류:", err.message);
+    console.error("❌ 주식 API 호출 오류:", err.message);
     
-    // API 오류 시 폴백 데이터 설정
+    // 재시도 로직
     if (retry < MAX_RETRIES) {
-      console.log(`재시도 중... (${retry + 1}/${MAX_RETRIES})`);
-      setTimeout(() => fetchStockIndices(retry + 1), 1000);
+      const retryDelay = 2000 * (retry + 1); // 2초, 4초
+      console.log(`⏳ ${retryDelay}ms 후 재시도... (${retry + 1}/${MAX_RETRIES})`);
+      setTimeout(() => fetchStockIndices(retry + 1), retryDelay);
       return;
     }
     
-    // 모든 재시도 실패 시
-    error.value = "데이터를 불러오는데 실패했습니다. 잠시 후 다시 시도해 주세요.";
+    // 모든 재시도 실패 시 에러 메시지
+    error.value = "실시간 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
     retryCount.value = retry;
 
-    // 폴백 데이터 (대표 값 샘플)
+    // 폴백 데이터 (2025년 12월 기준 대략적인 값)
     indices.value = {
-      NASDAQ: { price: 15835.62, change: 1.25 },
-      DOW: { price: 36845.25, change: -0.45 },
-      SP500: { price: 4720.15, change: 0.32 },
-      KOSPI: { price: 2620.45, change: -0.28 },
-      NIKKEI225: { price: 36550.30, change: 0.40 },
-      HANGSENG: { price: 16680.20, change: -0.15 },
-      FTSE100: { price: 7725.10, change: 0.12 },
-      DAX: { price: 17080.55, change: 0.20 },
+      NASDAQ: { price: "19735.12", change: 0.28 },
+      DOW: { price: "43910.98", change: -0.15 },
+      SP500: { price: "6051.09", change: 0.42 },
+      KOSPI: { price: "2417.84", change: -0.65 },
+      NIKKEI225: { price: "39081.25", change: 0.15 },
+      HANGSENG: { price: "20426.34", change: -0.42 },
+      FTSE100: { price: "8253.68", change: 0.08 },
+      DAX: { price: "20426.27", change: 0.22 },
     };
     
   } finally {
-    if (retry === 0 || retry === MAX_RETRIES) {
+    if (retry === 0 || retry >= MAX_RETRIES) {
       loading.value = false;
     }
   }
